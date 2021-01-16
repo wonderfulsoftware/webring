@@ -3,6 +3,7 @@ const siteData = Vue.reactive({})
 const app = Vue.createApp({
   setup() {
     const currentLink = Vue.ref()
+    const showingListOnMobile = Vue.ref(false)
     const links = Array.from(document.querySelectorAll("#ring > li")).map(
       (li) => {
         const id = li.id
@@ -11,9 +12,10 @@ const app = Vue.createApp({
         const text = a.innerText
         const select = () => {
           currentLink.value = link
+          showingListOnMobile.value = false
           location.hash = "#" + id
         }
-        const link = { id, text, url, a, li, select }
+        const link = Vue.reactive({ id, text, url, a, li, select })
         a.addEventListener("click", (e) => {
           e.preventDefault()
           select()
@@ -31,15 +33,26 @@ const app = Vue.createApp({
     }
     updateCurrentLink()
 
-    const previous = () => {}
+    const previous = () => {
+      let index = links.indexOf(currentLink.value)
+      if (index === -1) index = 0
+      index = (index + links.length - 1) % links.length
+      links[index].select()
+    }
     const random = () => {
       links[~~(Math.random() * links.length)].select()
     }
-    const next = () => {}
+    const next = () => {
+      let index = (links.indexOf(currentLink.value) + 1) % links.length
+      links[index].select()
+    }
 
     const currentSiteData = Vue.computed(() => {
       return currentLink.value && siteData[currentLink.value.id]
     })
+    const showList = () => {
+      showingListOnMobile.value = true
+    }
 
     return {
       previous,
@@ -47,11 +60,13 @@ const app = Vue.createApp({
       next,
       currentLink,
       currentSiteData,
+      showList,
+      showingListOnMobile,
     }
   },
 })
 
-const instance = app.mount("#aux")
+const instance = app.mount("#app")
 
 setTimeout(() => {
   siteData["dt.in.th"] = {
