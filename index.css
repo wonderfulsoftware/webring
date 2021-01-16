@@ -1,0 +1,103 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background: white;
+  color: #353435;
+  padding: 24px;
+  line-height: 1.5;
+}
+h1 {
+  color: #605850;
+  margin: 0;
+  font-size: 1.25rem;
+}
+h1 img {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+a {
+  color: #da3567;
+  text-decoration: none;
+}
+main {
+  margin-right: 540px;
+}
+
+#about {
+  color: #888583;
+  margin-left: 42px;
+}
+#about a {
+  color: inherit;
+  opacity: 0.8;
+}
+#about a::before {
+  content: "[";
+  opacity: 0.5;
+}
+#about a::after {
+  content: "]";
+  opacity: 0.5;
+}
+
+#ring {
+  padding-left: 36px;
+}
+#ring li {
+  padding-left: 6px;
+  margin: 8px 0;
+}
+#ring a {
+  margin: -3px;
+  padding: 3px;
+  background: #fff;
+  border-radius: 3px;
+  transition: 0.5s all;
+}
+#ring li:target a {
+  background: #da3567;
+  color: #fff;
+}
+
+#aux {
+  position: fixed;
+  right: 0;
+  top: 20px;
+  width: 480px;
+  padding: 14px 20px 12px;
+  border-left: 1px solid #f5f4f3;
+}
+.info-link {
+  display: block;
+  overflow: hidden;
+  padding-top: 75%;
+  position: relative;
+  border-radius: 3px;
+  background: #e9e8e7;
+}
+.info-link::after {
+  display: block;
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-shadow: inset 0 1px 8px #0002;
+}
+.info-link img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#site-nav button {
+  padding: 5px 7px;
+  background: transparent;
+  border: 1px solid #e9e8e7;
+  border-radius: 3px;
+}
+h2 {
+  margin: 0.8rem 0;
+}

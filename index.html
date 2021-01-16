@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>วงแหวนเว็บ</title>
+    <link rel="stylesheet" href="index.css" type="text/css" />
+  </head>
+  <body>
+    <main>
+      <h1>
+        <img
+          alt=""
+          src="webring.svg"
+          width="32"
+          height="32"
+        />wonderful.software webring
+      </h1>
+
+      <div id="about">
+        <p>
+          “วงแหวนเว็บ” แห่งนี้สร้างขึ้นเพื่อส่งเสริมให้ศิลปิน นักออกแบบ
+          และนักพัฒนาชาวไทย
+          สร้างเว็บไซต์ของตัวเองและแบ่งปันการเข้าชมซึ่งกันและกัน
+          <a href="https://github.com/wonderfulsoftware/webring"
+            >อ่านเพิ่มเติม</a
+          >
+        </p>
+      </div>
+
+      <ol id="ring">
+        <li data-lang="th" id="wonderful.software">
+          <a href="https://wonderful.software">wonderful.software</a>
+        </li>
+        <li data-lang="en" id="dt.in.th">
+          <a href="https://dt.in.th">dt.in.th</a>
+        </li>
+      </ol>
+    </main>
+
+    <div id="aux">
+      <template v-if="true">
+        <div id="site-info">
+          <nav id="site-nav">
+            <button @click="previous">&laquo; previous</button>
+            {{' '}}
+            <button @click="random">random</button>
+            {{' '}}
+            <button @click="next">next &raquo;</button>
+          </nav>
+          <h2>{{ currentLink && currentLink.text }}</h2>
+          <p v-if="currentLink">
+            <a :href="currentLink.url" class="info-link">
+              <img
+                v-if="currentSiteData"
+                style="max-width: 100%"
+                :src="currentSiteData.desktopImageUrl"
+              />
+            </a>
+          </p>
+        </div>
+      </template>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/vue@3.0.5/dist/vue.global.prod.js"
+      integrity="sha256-2KnOUvjJn/oCJPCIK1g0/2k6ruZzFZ9u4KkbWJDiwl8="
+      crossorigin="anonymous"
+    ></script>
+    <script src="index.js"></script>
+  </body>
+</html>
