@@ -32,33 +32,7 @@
       </ol>
     </main>
 
-    <div id="app">
-      <div id="aux" :class="{'--hide-on-mobile': showingListOnMobile}">
-        <template v-if="true">
-          <div id="site-info">
-            <nav id="site-nav">
-              <button @click="previous">&laquo; previous</button>
-              <button @click="random">random</button>
-              <button @click="next">next &raquo;</button>
-              <button @click="showList" id="show-list-button">list</button>
-            </nav>
-            <h2>{{ currentLink && currentLink.text }}</h2>
-            <p v-if="currentLink">
-              <a :href="currentLink.url" class="info-link">
-                <img
-                  v-if="currentSiteData"
-                  style="max-width: 100%"
-                  :src="currentSiteData.desktopImageUrl"
-                />
-                <span class="info-link__visit">
-                  <span class="info-link__text">เข้าชมเว็บไซต์</span>
-                </span>
-              </a>
-            </p>
-          </div>
-        </template>
-      </div>
-    </div>
+    <div id="app"></div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/vue@3.0.5/dist/vue.global.prod.js"

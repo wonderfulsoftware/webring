@@ -1,7 +1,35 @@
 /// <reference path="typedefs.d.ts" />
 const siteData = Vue.reactive({})
+const html = String.raw
 
 const app = Vue.createApp({
+  template: html` <div
+    id="aux"
+    v-if="currentLink"
+    :class="{'--hide-on-mobile': showingListOnMobile}"
+  >
+    <div id="site-info">
+      <nav id="site-nav">
+        <button @click="previous">&laquo; previous</button>
+        <button @click="random">random</button>
+        <button @click="next">next &raquo;</button>
+        <button @click="showList" id="show-list-button">list</button>
+      </nav>
+      <h2>{{ currentLink.text }}</h2>
+      <p>
+        <a :href="currentLink.url" class="info-link">
+          <img
+            v-if="currentSiteData"
+            style="max-width: 100%"
+            :src="currentSiteData.desktopImageUrl"
+          />
+          <span class="info-link__visit">
+            <span class="info-link__text">เข้าชมเว็บไซต์</span>
+          </span>
+        </a>
+      </p>
+    </div>
+  </div>`,
   setup() {
     const currentLink = Vue.ref()
     const showingListOnMobile = Vue.ref(true)
@@ -56,7 +84,7 @@ const app = Vue.createApp({
 
     Vue.onMounted(() => {
       updateCurrentLink()
-      if (!currentLink.value) {
+      if (!currentLink.value && location.hash !== "#list") {
         random()
       }
       requestAnimationFrame(() => {
