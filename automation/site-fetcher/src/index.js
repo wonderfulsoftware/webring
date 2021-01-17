@@ -16,6 +16,17 @@ module.exports = async (req, res) => {
     return send(res, 400, "No url")
   }
 
+  const key = url.searchParams.get("key")
+  if (key && !process.env.API_KEY) {
+    return send(res, 500, "API_KEY not configured")
+  }
+  if (!key && process.env.API_KEY) {
+    return send(res, 401, "No key")
+  }
+  if (key !== process.env.API_KEY) {
+    return send(res, 401, "Wrong key")
+  }
+
   if (!browser) {
     browser = await puppeteer.launch({
       args: ["--no-sandbox"],
@@ -31,7 +42,6 @@ module.exports = async (req, res) => {
       .catch(console.error)
     const image = await capture(page)
     res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
-    res.setHeader("Vary", "Accept-Encoding")
     console.log(image.blurhash)
     if (url.searchParams.get("as") === "json") {
       res.setHeader("Content-Type", "application/json")
