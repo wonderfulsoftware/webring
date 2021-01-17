@@ -39,7 +39,7 @@ injectStyle(css`
     }
   }
   #site-info {
-    max-width: 640px;
+    max-width: 360px;
     margin: 0 auto;
   }
 
