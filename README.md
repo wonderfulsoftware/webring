@@ -31,12 +31,13 @@
    ```
 
    - อย่าลืมเปลี่ยน `YOUR.DOMAIN` เป็นชื่อโดเมนเว็บของคุณ
+   - ไว้ตำแหน่งไหนของหน้าเว็บก็ได้ สามารถปรับขนาดและสีของไอคอนได้
 
    ไฟล์ไอคอน:
 
    - <https://webring.wonderful.software/webring.black.svg>
    - <https://webring.wonderful.software/webring.white.svg>
-   - <https://webring.wonderful.software/webring.svg> (สามารถโหลดไปปรับเปลี่ยนสีได้)
+   - <https://webring.wonderful.software/webring.svg> (สามารถโหลดไฟล์ SVG ไปปรับเปลี่ยนสีได้)
 
 2. แก้ไขไฟล์ [index.html](index.html) เพิ่มลิงค์ไปยังเว็บของคุณ
 
