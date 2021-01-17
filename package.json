@@ -10,6 +10,7 @@
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.5",
     "execa": "^5.0.0",
+    "jimp": "^0.16.1",
     "make-promises-safe": "^5.1.0"
   }
 }

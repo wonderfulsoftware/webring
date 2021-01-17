@@ -1,0 +1,31 @@
+name: Update stats
+on:
+  workflow_dispatch: {}
+jobs:
+  update:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: "wonderfulsoftware/webring-site-data"
+          ssh-key: ${{ secrets.WEBRING_SITE_DATA_DEPLOY_KEY }}
+          path: tmp/webring-site-data
+      - uses: actions/checkout@v2
+        with:
+          repository: "wonderfulsoftware/webring-site-screenshots"
+          ssh-key: ${{ secrets.WEBRING_SITE_SCREENSHOTS_DEPLOY_KEY }}
+          path: tmp/webring-site-screenshots
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: yarn
+      - run: node automation/site-updater
+        env:
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
+      - run: cd tmp/webring-site-screenshots && git add -A && git commit -m "Update site screenshots" && git push
+      - run: cd tmp/webring-site-data && git add -A && git commit -m "Update site data" && git push"
+        env:
+          GIT_COMMITTER_NAME: dtinth-bot
+          GIT_AUTHOR_NAME: dtinth-bot
+          EMAIL: dtinth-bot@users.noreply.github.com
