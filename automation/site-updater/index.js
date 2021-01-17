@@ -50,11 +50,12 @@ const siteFetcherInstanceBase = encrypted(`
         if (!existingImage || areImagesDifferent(existingImage, newImage)) {
           fs.writeFileSync(imagePath, newImageBuffer)
           console.log("Written", imagePath)
+          data.mobileImageUrlV2 = `https://wonderfulsoftware.github.io/webring-site-screenshots/${imageBasename}`
+          data.blurhash = fetchResult.blurhash
+          data.screenshotUpdatedAt = new Date().toJSON()
         }
-        data.blurhash = fetchResult.blurhash
         data.description = fetchResult.description
         data.backlink = fetchResult.backlink
-        data.mobileImageUrlV2 = `https://wonderfulsoftware.github.io/webring-site-screenshots/${imageBasename}`
         data.lastUpdated = new Date().toJSON()
         console.log(data)
       }
