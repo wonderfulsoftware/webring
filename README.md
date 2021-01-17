@@ -20,7 +20,7 @@
 1. ลิงค์เว็บของคุณมาที่วงแหวนเว็บนี้:
 
    ```html
-   <a href="https://webring.wonderful.software" title="วงแหวนเว็บ">
+   <a href="https://webring.wonderful.software#YOUR.DOMAIN" title="วงแหวนเว็บ">
      <img
        alt="วงแหวนเว็บ"
        width="32"
