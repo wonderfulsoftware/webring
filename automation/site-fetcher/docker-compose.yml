@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  server:
+    restart: unless-stopped
+    build: .
+    init: true
+    command: yarn dev
+    ports:
+      - 127.0.0.1:3000:3000
+    volumes:
+      - ./.env:/usr/src/app/.env
+      - ./src:/usr/src/app/src
+      - ./.fonts.conf:/home/pptruser/.fonts.conf
