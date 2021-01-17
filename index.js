@@ -49,10 +49,24 @@ injectStyle(css`
       pointer-events: unset;
     }
   }
+
   #site-info {
     max-width: 360px;
     margin: 0 auto;
   }
+
+  .site-info-item {
+    position: absolute;
+    top: 42px;
+    right: 20px;
+    left: 20px;
+    transition: 0.3s transform, 0.3s opacity;
+  }
+  .site-info-item__body {
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
   h2 {
     margin: 0.8rem 0 0;
   }
@@ -177,33 +191,100 @@ const app = Vue.createApp({
         <button @click="next">next &raquo;</button>
         <button @click="showList" id="show-list-button">list</button>
       </nav>
-      <h2>{{ currentLink.text }}</h2>
-      <p class="site-description">
-        {{ currentSiteData && currentSiteData.description }}
-      </p>
-      <p :key="currentLink.id">
-        <a :href="currentLink.url" class="info-link">
-          <blurhash-image
-            v-if="currentSiteData && currentSiteData.blurhash"
-            :blurhash="currentSiteData.blurhash"
-          ></blurhash-image>
-          <img
-            v-if="currentSiteData"
-            style="max-width: 100%"
-            :src="currentSiteData.mobileImageUrlV2"
-          />
-          <span class="info-link__visit">
-            <span class="info-link__text">เข้าชมเว็บไซต์</span>
-          </span>
-        </a>
-      </p>
+      <div
+        class="site-info-item"
+        v-for="({link, style}, id) of viewingLinks"
+        :key="id"
+        :style="style"
+      >
+        <div class="site-info-item__body">
+          <h2>{{ link.text }}</h2>
+          <p class="site-description">
+            {{ link.siteData && link.siteData.description }}
+          </p>
+          <p>
+            <a :href="link.url" class="info-link">
+              <blurhash-image
+                v-if="link.siteData && link.siteData.blurhash"
+                :blurhash="link.siteData.blurhash"
+              ></blurhash-image>
+              <img
+                v-if="link.siteData"
+                style="max-width: 100%"
+                :src="link.siteData.mobileImageUrlV2"
+              />
+              <span class="info-link__visit">
+                <span class="info-link__text">เข้าชมเว็บไซต์</span>
+              </span>
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   </div>`,
   setup() {
     const currentLink = Vue.ref()
+
+    let needsInboundTransition = false
+    const viewingLinks = Vue.reactive({})
+    Vue.watch(
+      () => currentLink.value,
+      (link, previous) => {
+        let exitTransform = "scale(0.5)"
+        if (link) {
+          let enterTransform = "scale(0.5)"
+          if (needsInboundTransition) {
+            enterTransform = "scale(1.5)"
+            needsInboundTransition = false
+          }
+          if (previous) {
+            enterTransform = `translateX(${
+              link.index > previous.index ? 100 : -100
+            }%)`
+            exitTransform = `translateX(${
+              link.index > previous.index ? -100 : 100
+            }%)`
+          }
+          const view = Vue.reactive({
+            link,
+            style: {
+              opacity: 0,
+              transform: enterTransform,
+            },
+          })
+          viewingLinks[link.id] = view
+          Vue.nextTick(() => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                view.style.opacity = 1
+                view.style.transform = ""
+              })
+            })
+          })
+        }
+        for (const key of Object.keys(viewingLinks)) {
+          if (key !== link.id) {
+            const view = viewingLinks[key]
+            if (view && !view.transitioningOut) {
+              view.transitioningOut = true
+              view.style.opacity = 0
+              view.style.transform = exitTransform
+              view.style.pointerEvents = "none"
+              setTimeout(() => {
+                if (viewingLinks[key] === view) {
+                  delete viewingLinks[key]
+                }
+              }, 1000)
+            }
+          }
+        }
+      },
+      { immediate: true }
+    )
+
     const hidingListOnMobile = Vue.ref(true)
     const links = Array.from(document.querySelectorAll("#ring > li")).map(
-      (li) => {
+      (li, index) => {
         const id = li.id
         const a = li.querySelector("a")
         const url = a.href
@@ -213,7 +294,17 @@ const app = Vue.createApp({
           hidingListOnMobile.value = false
           location.hash = "#/" + id
         }
-        const link = Vue.reactive({ id, text, url, a, li, select })
+        const data = Vue.computed(() => siteData[id])
+        const link = Vue.reactive({
+          id,
+          text,
+          url,
+          a,
+          li,
+          select,
+          siteData: data,
+          index,
+        })
         a.addEventListener("click", (e) => {
           e.preventDefault()
           select()
@@ -225,7 +316,13 @@ const app = Vue.createApp({
     const processInboundLink = () => {
       const hash = location.hash
       if (hash.startsWith("#") && !hash.startsWith("#/")) {
-        location.replace("#/" + hash.slice(2))
+        const id = hash.slice(1)
+        location.replace("#/" + hash.slice(1))
+        const matchedLink = links.find((l) => l.id === id)
+        if (matchedLink) {
+          needsInboundTransition = true
+          return true
+        }
       }
     }
     const updateCurrentLink = () => {
@@ -240,8 +337,7 @@ const app = Vue.createApp({
     }
 
     const previous = () => {
-      let index = links.indexOf(currentLink.value)
-      if (index === -1) index = 0
+      let index = currentLink.value ? currentLink.value.index : 0
       index = (index + links.length - 1) % links.length
       links[index].select()
     }
@@ -249,23 +345,26 @@ const app = Vue.createApp({
       links[~~(Math.random() * links.length)].select()
     }
     const next = () => {
-      let index = (links.indexOf(currentLink.value) + 1) % links.length
+      let index =
+        ((currentLink.value ? currentLink.value.index : -1) + 1) % links.length
       links[index].select()
     }
 
-    const currentSiteData = Vue.computed(() => {
-      return currentLink.value && siteData[currentLink.value.id]
-    })
     const showList = () => {
       hidingListOnMobile.value = true
       location.hash = "#list"
     }
 
     Vue.onMounted(() => {
-      processInboundLink()
+      const inbound = processInboundLink()
       updateCurrentLink()
-      if (!currentLink.value && location.hash !== "#list") {
+      if (!currentLink.value && location.hash !== "#/list") {
         random()
+      }
+      if (inbound) {
+        setTimeout(() => {
+          next()
+        }, 500)
       }
       window.addEventListener("hashchange", () => {
         updateCurrentLink()
@@ -303,9 +402,9 @@ const app = Vue.createApp({
       random,
       next,
       currentLink,
-      currentSiteData,
       showList,
       hidingListOnMobile,
+      viewingLinks,
     }
   },
 })
