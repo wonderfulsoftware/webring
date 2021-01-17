@@ -6,7 +6,7 @@ const app = Vue.createApp({
   template: html` <div
     id="aux"
     v-if="currentLink"
-    :class="{'--hide-on-mobile': showingListOnMobile}"
+    :class="{'--hide-on-mobile': hidingListOnMobile}"
   >
     <div id="site-info">
       <nav id="site-nav">
@@ -32,7 +32,7 @@ const app = Vue.createApp({
   </div>`,
   setup() {
     const currentLink = Vue.ref()
-    const showingListOnMobile = Vue.ref(true)
+    const hidingListOnMobile = Vue.ref(true)
     const links = Array.from(document.querySelectorAll("#ring > li")).map(
       (li) => {
         const id = li.id
@@ -41,7 +41,7 @@ const app = Vue.createApp({
         const text = a.innerText
         const select = () => {
           currentLink.value = link
-          showingListOnMobile.value = false
+          hidingListOnMobile.value = false
           location.hash = "#" + id
         }
         const link = Vue.reactive({ id, text, url, a, li, select })
@@ -58,6 +58,9 @@ const app = Vue.createApp({
       const found = links.find((l) => "#" + l.id === hash)
       if (found) {
         currentLink.value = found
+        hidingListOnMobile.value = false
+      } else if (hash === "#list") {
+        hidingListOnMobile.value = true
       }
     }
 
@@ -79,7 +82,8 @@ const app = Vue.createApp({
       return currentLink.value && siteData[currentLink.value.id]
     })
     const showList = () => {
-      showingListOnMobile.value = true
+      hidingListOnMobile.value = true
+      location.hash = "#list"
     }
 
     Vue.onMounted(() => {
@@ -87,8 +91,11 @@ const app = Vue.createApp({
       if (!currentLink.value && location.hash !== "#list") {
         random()
       }
+      window.addEventListener("hashchange", () => {
+        updateCurrentLink()
+      })
       requestAnimationFrame(() => {
-        showingListOnMobile.value = false
+        hidingListOnMobile.value = false
       })
     })
 
@@ -110,7 +117,7 @@ const app = Vue.createApp({
       currentLink,
       currentSiteData,
       showList,
-      showingListOnMobile,
+      hidingListOnMobile,
     }
   },
 })

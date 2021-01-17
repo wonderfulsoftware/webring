@@ -3,21 +3,50 @@ body {
     Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   background: white;
   color: #353435;
-  padding: 24px;
+  padding: 16px;
+  margin: 0;
   line-height: 1.5;
 }
+@media (min-width: 960px) {
+  body {
+    padding: 32px;
+  }
+}
+
+a {
+  color: #da3567;
+  text-decoration: none;
+}
+
 h1 {
   color: #605850;
   margin: 0;
   font-size: 1.25rem;
+  background: #aaa;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 16px;
+  padding-bottom: 0;
+  background: white;
+  height: 64px;
+  z-index: 100;
+  box-sizing: border-box;
+}
+@media (min-width: 960px) {
+  h1 {
+    padding-left: 32px;
+    padding-top: 32px;
+    right: 540px;
+  }
 }
 h1 img {
   vertical-align: middle;
   margin-right: 10px;
 }
-a {
-  color: #da3567;
-  text-decoration: none;
+h1 a {
+  color: inherit;
 }
 
 main {
@@ -35,6 +64,7 @@ main {
 #about {
   color: #888583;
   margin-left: 42px;
+  margin-top: 48px;
 }
 #about a {
   color: inherit;
@@ -70,12 +100,12 @@ main {
 
 #aux {
   position: fixed;
-  top: 0;
+  top: 64px;
   right: 0;
   bottom: 0;
   left: 0;
   background: white;
-  padding: 20px;
+  padding: 0 20px 20px;
   opacity: 1;
   transition: 0.5s opacity, 0.5s transform;
 }
