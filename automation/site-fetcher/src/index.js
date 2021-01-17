@@ -17,13 +17,10 @@ module.exports = async (req, res) => {
   }
 
   const key = url.searchParams.get("key")
-  if (key && !process.env.API_KEY) {
+  if (!process.env.API_KEY && key) {
     return send(res, 500, "API_KEY not configured")
   }
-  if (!key && process.env.API_KEY) {
-    return send(res, 401, "No key")
-  }
-  if (key !== process.env.API_KEY) {
+  if (process.env.API_KEY && key !== process.env.API_KEY) {
     return send(res, 401, "Wrong key")
   }
 
@@ -41,6 +38,20 @@ module.exports = async (req, res) => {
       .goto(captureUrl, { waitUntil: "networkidle0", timeout: 10000 })
       .catch(console.error)
     const image = await capture(page)
+    const description = await page.evaluate(() => {
+      const contentOf = (selector) => {
+        const element = document.querySelector(selector)
+        const value = element && element.getAttribute("content")
+        return value ? String(value).slice(0, 300) : null
+      }
+      return (
+        contentOf('meta[property="og:description"]') ||
+        contentOf('meta[name="twitter:description"]') ||
+        contentOf('meta[name="description"]') ||
+        contentOf('meta[itemprop="description"]') ||
+        null
+      )
+    })
     res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
     console.log(image.blurhash)
     if (url.searchParams.get("as") === "json") {
@@ -48,6 +59,7 @@ module.exports = async (req, res) => {
       return send(res, 200, {
         blurhash: image.blurhash,
         content: image.buffer.toString("base64"),
+        description,
       })
     } else {
       res.setHeader("Content-Type", "image/png")
