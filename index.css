@@ -159,6 +159,7 @@ main {
   background: transparent;
   border: 1px solid #e9e8e7;
   border-radius: 3px;
+  cursor: pointer;
 }
 #site-nav #show-list-button {
   margin-left: auto;
