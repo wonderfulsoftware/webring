@@ -211,7 +211,7 @@ const app = Vue.createApp({
         const select = () => {
           currentLink.value = link
           hidingListOnMobile.value = false
-          location.hash = "#" + id
+          location.hash = "#/" + id
         }
         const link = Vue.reactive({ id, text, url, a, li, select })
         a.addEventListener("click", (e) => {
@@ -222,13 +222,19 @@ const app = Vue.createApp({
       }
     )
 
+    const processInboundLink = () => {
+      const hash = location.hash
+      if (hash.startsWith("#") && !hash.startsWith("#/")) {
+        location.replace("#/" + hash.slice(2))
+      }
+    }
     const updateCurrentLink = () => {
       const hash = location.hash
-      const found = links.find((l) => "#" + l.id === hash)
+      const found = links.find((l) => "#/" + l.id === hash)
       if (found) {
         currentLink.value = found
         hidingListOnMobile.value = false
-      } else if (hash === "#list") {
+      } else if (hash === "#/list") {
         hidingListOnMobile.value = true
       }
     }
@@ -256,6 +262,7 @@ const app = Vue.createApp({
     }
 
     Vue.onMounted(() => {
+      processInboundLink()
       updateCurrentLink()
       if (!currentLink.value && location.hash !== "#list") {
         random()
@@ -283,10 +290,10 @@ const app = Vue.createApp({
       () => currentLink.value,
       (currentLink, previousLink) => {
         if (previousLink) {
-          previousLink.li.removeAttribute("data-was-selected")
+          previousLink.li.removeAttribute("data-current")
         }
         if (currentLink) {
-          currentLink.li.setAttribute("data-was-selected", "1")
+          currentLink.li.setAttribute("data-current", "1")
         }
       }
     )
