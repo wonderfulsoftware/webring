@@ -42,6 +42,19 @@ injectStyle(css`
     max-width: 360px;
     margin: 0 auto;
   }
+  h2 {
+    margin: 0.8rem 0 0;
+  }
+  .site-description {
+    margin-top: 0;
+    color: #605850;
+    line-height: 1.5em;
+    height: 3em;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
 
   .info-link {
     display: block;
@@ -110,9 +123,6 @@ injectStyle(css`
       display: none;
     }
   }
-  h2 {
-    margin: 0.8rem 0;
-  }
 
   /* https://github.com/dtinth/blurhash-image */
   blurhash-image {
@@ -141,6 +151,9 @@ const app = Vue.createApp({
         <button @click="showList" id="show-list-button">list</button>
       </nav>
       <h2>{{ currentLink.text }}</h2>
+      <p class="site-description">
+        {{ currentSiteData && currentSiteData.description }}
+      </p>
       <p :key="currentLink.id">
         <a :href="currentLink.url" class="info-link">
           <blurhash-image
