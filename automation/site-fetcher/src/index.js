@@ -52,6 +52,21 @@ module.exports = async (req, res) => {
         null
       )
     })
+    const backlink = await page.evaluate(() => {
+      const element = document.querySelector(
+        'a[href^="https://webring.wonderful.software"]'
+      )
+      const rect = element && element.getBoundingClientRect()
+      return element
+        ? {
+            rect:
+              rect && rect.width + rect.height > 0
+                ? [rect.width, rect.height, rect.left, rect.top].join(":")
+                : null,
+            href: element.getAttribute("href") || null,
+          }
+        : null
+    })
     res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
     console.log(image.blurhash)
     if (url.searchParams.get("as") === "json") {
@@ -60,6 +75,7 @@ module.exports = async (req, res) => {
         blurhash: image.blurhash,
         content: image.buffer.toString("base64"),
         description,
+        backlink,
       })
     } else {
       res.setHeader("Content-Type", "image/png")
