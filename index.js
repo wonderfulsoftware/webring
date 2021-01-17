@@ -110,6 +110,18 @@ const app = Vue.createApp({
       Object.assign(siteData, data)
     })
 
+    Vue.watch(
+      () => currentLink.value,
+      (currentLink, previousLink) => {
+        if (previousLink) {
+          previousLink.li.removeAttribute("data-was-selected")
+        }
+        if (currentLink) {
+          currentLink.li.setAttribute("data-was-selected", "1")
+        }
+      }
+    )
+
     return {
       previous,
       random,

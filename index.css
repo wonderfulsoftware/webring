@@ -93,6 +93,9 @@ main {
   border-radius: 3px;
   transition: 0.5s all;
 }
+#ring li[data-was-selected] a {
+  box-shadow: 0 0 7px #da356777;
+}
 #ring li:target a {
   background: #da3567;
   color: #fff;
