@@ -38,7 +38,7 @@ h1 {
   h1 {
     padding-left: 32px;
     padding-top: 32px;
-    right: 540px;
+    right: 420px;
   }
 }
 h1 img {
@@ -57,7 +57,7 @@ main {
   main {
     max-width: auto;
     margin-left: 0;
-    margin-right: 540px;
+    margin-right: 420px;
   }
 }
 
@@ -99,109 +99,4 @@ main {
 #ring li:target a {
   background: #da3567;
   color: #fff;
-}
-
-#aux {
-  position: fixed;
-  top: 64px;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: white;
-  padding: 0 20px 20px;
-  opacity: 1;
-  transition: 0.5s opacity, 0.5s transform;
-}
-.--hide-on-mobile#aux {
-  opacity: 0;
-  pointer-events: none;
-}
-@media (min-width: 960px) {
-  #aux {
-    top: 20px;
-    width: 480px;
-    left: auto;
-    bottom: auto;
-    padding: 14px 20px 12px;
-    border-left: 1px solid #f5f4f3;
-  }
-  .--hide-on-mobile#aux {
-    opacity: 1;
-    pointer-events: unset;
-  }
-}
-#site-info {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.info-link {
-  display: block;
-  overflow: hidden;
-  padding-top: 75%;
-  position: relative;
-  border-radius: 3px;
-  background: #e9e8e7;
-}
-.info-link::after {
-  display: block;
-  position: absolute;
-  content: "";
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  box-shadow: inset 0 1px 8px #0002;
-}
-.info-link img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-.info-link__visit {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #88858355;
-  opacity: 0;
-  transition: 0.1s opacity;
-}
-.info-link:hover .info-link__visit {
-  opacity: 1;
-}
-.info-link__text {
-  background: #605850cc;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 100px;
-}
-#site-nav {
-  display: flex;
-  margin-left: -0.3rem;
-}
-#site-nav button {
-  margin-left: 0.3rem;
-  padding: 5px 7px;
-  background: transparent;
-  border: 1px solid #e9e8e7;
-  border-radius: 3px;
-  cursor: pointer;
-}
-#site-nav #show-list-button {
-  margin-left: auto;
-}
-@media (min-width: 960px) {
-  #site-nav #show-list-button {
-    display: none;
-  }
-}
-h2 {
-  margin: 0.8rem 0;
 }
