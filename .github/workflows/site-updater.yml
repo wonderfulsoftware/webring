@@ -29,7 +29,7 @@ jobs:
           GIT_COMMITTER_NAME: GitHub Actions
           GIT_AUTHOR_NAME: GitHub Actions
           EMAIL: github-actions[bot]@users.noreply.github.com
-      - run: cd tmp/webring-site-data && git add -A && git commit -m "Update site data" && git push"
+      - run: cd tmp/webring-site-data && git add -A && git commit -m "Update site data" && git push
         env:
           GIT_COMMITTER_NAME: dtinth-bot
           GIT_AUTHOR_NAME: dtinth-bot
