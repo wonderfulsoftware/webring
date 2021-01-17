@@ -30,6 +30,8 @@
    </a>
    ```
 
+   - อย่าลืมเปลี่ยน `YOUR.DOMAIN` เป็นชื่อโดเมนเว็บของคุณ
+
    ไฟล์ไอคอน:
 
    - <https://webring.wonderful.software/webring.black.svg>
