@@ -46,7 +46,7 @@ injectStyle(css`
   .info-link {
     display: block;
     overflow: hidden;
-    padding-top: 177%;
+    padding-top: 170.67%;
     position: relative;
     border-radius: 3px;
     background: #e9e8e7;
@@ -113,6 +113,18 @@ injectStyle(css`
   h2 {
     margin: 0.8rem 0;
   }
+
+  /* https://github.com/dtinth/blurhash-image */
+  blurhash-image {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #888 no-repeat center;
+    background-size: 100% 100%;
+  }
 `)
 
 const app = Vue.createApp({
@@ -129,12 +141,16 @@ const app = Vue.createApp({
         <button @click="showList" id="show-list-button">list</button>
       </nav>
       <h2>{{ currentLink.text }}</h2>
-      <p>
+      <p :key="currentLink.id">
         <a :href="currentLink.url" class="info-link">
+          <blurhash-image
+            v-if="currentSiteData && currentSiteData.blurhash"
+            :blurhash="currentSiteData.blurhash"
+          ></blurhash-image>
           <img
             v-if="currentSiteData"
             style="max-width: 100%"
-            :src="currentSiteData.mobileImageUrl"
+            :src="currentSiteData.mobileImageUrlV2"
           />
           <span class="info-link__visit">
             <span class="info-link__text">เข้าชมเว็บไซต์</span>

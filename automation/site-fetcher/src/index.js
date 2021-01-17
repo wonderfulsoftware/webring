@@ -118,7 +118,7 @@ async function capture(page) {
     width,
     height,
     4,
-    3
+    7
   )
   screenshot = await optimize(screenshot)
   return { buffer: screenshot, blurhash }
