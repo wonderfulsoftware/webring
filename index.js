@@ -4,7 +4,7 @@ const siteData = Vue.reactive({})
 const app = Vue.createApp({
   setup() {
     const currentLink = Vue.ref()
-    const showingListOnMobile = Vue.ref(false)
+    const showingListOnMobile = Vue.ref(true)
     const links = Array.from(document.querySelectorAll("#ring > li")).map(
       (li) => {
         const id = li.id
@@ -32,7 +32,6 @@ const app = Vue.createApp({
         currentLink.value = found
       }
     }
-    updateCurrentLink()
 
     const previous = () => {
       let index = links.indexOf(currentLink.value)
@@ -54,6 +53,16 @@ const app = Vue.createApp({
     const showList = () => {
       showingListOnMobile.value = true
     }
+
+    Vue.onMounted(() => {
+      updateCurrentLink()
+      if (!currentLink.value) {
+        random()
+      }
+      requestAnimationFrame(() => {
+        showingListOnMobile.value = false
+      })
+    })
 
     Vue.onMounted(async () => {
       const response = await fetch(
