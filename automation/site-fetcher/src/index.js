@@ -30,9 +30,19 @@ module.exports = async (req, res) => {
       .goto(captureUrl, { waitUntil: "networkidle0", timeout: 10000 })
       .catch(console.error)
     const image = await capture(page)
-    res.setHeader("Content-Type", "image/png")
+    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
+    res.setHeader("Vary", "Accept-Encoding")
     console.log(image.blurhash)
-    return send(res, 200, image.buffer)
+    if (url.searchParams.get("as") === "json") {
+      res.setHeader("Content-Type", "application/json")
+      return send(res, 200, {
+        blurhash: image.blurhash,
+        content: image.buffer.toString("base64"),
+      })
+    } else {
+      res.setHeader("Content-Type", "image/png")
+      return send(res, 200, image.buffer)
+    }
   } finally {
     await page.close()
   }
