@@ -38,6 +38,8 @@ RUN yarn \
     && chown -R pptruser:pptruser /usr/src/app
 
 USER pptruser
+RUN mkdir -p /home/pptruser/.fonts \
+    && wget https://github.com/cadsondemak/Sarabun/archive/master.tar.gz -O- | tar xvz -C ~/.fonts --strip-components=2 --wildcards '*.ttf'
 CMD yarn start
 COPY ./src/ ./src/
 COPY ./.fonts.conf /home/pptruser/
