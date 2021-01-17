@@ -100,3 +100,16 @@ main {
   background: #da3567;
   color: #fff;
 }
+
+/* 
+#ring {
+  display: flex;
+  padding-left: 0;
+  flex-wrap: wrap;
+  color: #888583;
+}
+#ring li {
+  margin-left: 36px;
+  margin-bottom: 0;
+}
+*/
