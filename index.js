@@ -24,12 +24,23 @@ injectStyle(css`
     opacity: 0;
     pointer-events: none;
   }
+  #aux::after {
+    position: absolute;
+    display: block;
+    content: "";
+    z-index: 90;
+    height: 128px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom, #fff0, #fff);
+  }
   @media (min-width: 960px) {
     #aux {
       top: 20px;
       width: 360px;
       left: auto;
-      bottom: auto;
       padding: 14px 20px 12px;
       border-left: 1px solid #f5f4f3;
     }
@@ -73,6 +84,7 @@ injectStyle(css`
     bottom: 0;
     left: 0;
     box-shadow: inset 0 1px 8px #0002;
+    z-index: 90;
   }
   .info-link img {
     position: absolute;
@@ -80,22 +92,37 @@ injectStyle(css`
     left: 0;
     width: 100%;
     height: 100%;
+    z-index: 50;
   }
   .info-link__visit {
     position: absolute;
     top: 0;
     right: 0;
-    bottom: 0;
+    height: 256px;
     left: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #88858355;
-    opacity: 0;
-    transition: 0.1s opacity;
+    z-index: 70;
   }
   .info-link:hover .info-link__visit {
     opacity: 1;
+  }
+  .info-link::before {
+    display: block;
+    position: absolute;
+    content: "";
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: #888583;
+    z-index: 60;
+    opacity: 0.1;
+    transition: 0.1s opacity;
+  }
+  .info-link:hover::before {
+    opacity: 0.2;
   }
   .info-link__text {
     background: #605850cc;
