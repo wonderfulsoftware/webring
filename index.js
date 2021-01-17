@@ -1,4 +1,5 @@
 /// <reference path="typedefs.d.ts" />
+
 const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
@@ -179,49 +180,52 @@ injectStyle(css`
 `)
 
 const app = Vue.createApp({
-  template: html` <div
-    id="aux"
-    v-if="currentLink"
-    :class="{'--hide-on-mobile': hidingListOnMobile}"
-  >
-    <div id="site-info">
-      <nav id="site-nav">
-        <button @click="previous">&laquo; previous</button>
-        <button @click="random">random</button>
-        <button @click="next">next &raquo;</button>
-        <button @click="showList" id="show-list-button">list</button>
-      </nav>
-      <div
-        class="site-info-item"
-        v-for="({link, style}, id) of viewingLinks"
-        :key="id"
-        :style="style"
-      >
-        <div class="site-info-item__body">
-          <h2>{{ link.text }}</h2>
-          <p class="site-description">
-            {{ link.siteData && link.siteData.description }}
-          </p>
-          <p>
-            <a :href="link.url" class="info-link">
-              <blurhash-image
-                v-if="link.siteData && link.siteData.blurhash"
-                :blurhash="link.siteData.blurhash"
-              ></blurhash-image>
-              <img
-                v-if="link.siteData"
-                style="max-width: 100%"
-                :src="link.siteData.mobileImageUrlV2"
-              />
-              <span class="info-link__visit">
-                <span class="info-link__text">เข้าชมเว็บไซต์</span>
-              </span>
-            </a>
-          </p>
+  template: html`
+    <div
+      id="aux"
+      v-if="currentLink"
+      :class="{'--hide-on-mobile': hidingListOnMobile}"
+    >
+      <div id="site-info">
+        <nav id="site-nav">
+          <button @click="previous">&laquo; previous</button>
+          <button @click="random">random</button>
+          <button @click="next">next &raquo;</button>
+          <button @click="showList" id="show-list-button">list</button>
+        </nav>
+        <div
+          class="site-info-item"
+          v-for="({link, style}, id) of viewingLinks"
+          :key="id"
+          :style="style"
+        >
+          <div class="site-info-item__body">
+            <h2>{{ link.text }}</h2>
+            <p class="site-description">
+              {{ link.siteData && link.siteData.description }}
+            </p>
+            <p>
+              <a :href="link.url" class="info-link">
+                <blurhash-image
+                  v-if="link.siteData && link.siteData.blurhash"
+                  :blurhash="link.siteData.blurhash"
+                ></blurhash-image>
+                <img
+                  v-if="link.siteData"
+                  style="max-width: 100%"
+                  :src="link.siteData.mobileImageUrlV2"
+                />
+                <span class="info-link__visit">
+                  <span class="info-link__text">เข้าชมเว็บไซต์</span>
+                </span>
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>`,
+    <for-first-timer />
+  `,
   setup() {
     const currentLink = Vue.ref()
 
@@ -406,6 +410,82 @@ const app = Vue.createApp({
       hidingListOnMobile,
       viewingLinks,
     }
+  },
+})
+
+injectStyle(css`
+  #for-first-timer {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 12px;
+    z-index: 200;
+    background: #f5f4f3;
+    color: #353435;
+    line-height: 1.5em;
+    border: 0;
+    text-align: left;
+    border-top: 1px solid #d9d8d7;
+    font-size: 0.9rem;
+    transition: 1s transform;
+    cursor: pointer;
+  }
+  #for-first-timer[data-hide="1"] {
+    transform: translateY(140%);
+  }
+  .webring-symbol {
+    display: inline-block;
+    position: relative;
+    width: 1.5em;
+    height: 1em;
+  }
+  .webring-symbol > img {
+    width: 1.4em;
+    height: 1.4em;
+    position: absolute;
+    top: calc(50% - 0.7em);
+    left: calc(50% - 0.7em);
+  }
+`)
+app.component("for-first-timer", {
+  template: html`<button
+    id="for-first-timer"
+    :data-hide="hide ? 1 : 0"
+    @click="acknowledge"
+    ref="button"
+  >
+    <strong>ยินดีต้อนรับสู่ “วงแหวนเว็บ”</strong>
+    เว็บนี้สร้างขึ้นเพื่อส่งเสริมให้ศิลปิน นักออกแบบ และนักพัฒนา
+    สร้างเว็บไซต์ของตัวเองและแบ่งปันการเข้าชมซึ่งกันและกัน
+    เว็บที่เข้าร่วมวงจะใช้สัญลักษณ์
+    <span class="webring-symbol">
+      <img src="webring.svg" />
+    </span>
+    เพื่อเชื่อมเว็บเข้าด้วยกันเป็นวงกลม
+    <span style="color: #888583">(กดเพื่อปิดข้อความนี้)</span>
+  </button>`,
+  setup() {
+    const hide = Vue.ref(true)
+    const button = Vue.ref()
+    Vue.onMounted(() => {
+      console.log(localStorage.WEBRING_ACKNOWLEDGED)
+      if (!localStorage.WEBRING_ACKNOWLEDGED) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            hide.value = false
+          })
+        })
+      }
+    })
+    const acknowledge = () => {
+      localStorage.WEBRING_ACKNOWLEDGED = "1"
+      hide.value = true
+      if (button.value) {
+        button.value.blur()
+      }
+    }
+    return { hide, acknowledge, button }
   },
 })
 
