@@ -210,9 +210,8 @@ const app = Vue.createApp({
                   v-if="link.siteData && link.siteData.blurhash"
                   :blurhash="link.siteData.blurhash"
                 ></blurhash-image>
-                <img
+                <image-that-doesnt-display-at-first-but-fades-in-once-loaded
                   v-if="link.siteData"
-                  style="max-width: 100%"
                   :src="link.siteData.mobileImageUrlV2"
                 />
                 <span class="info-link__visit">
@@ -465,6 +464,28 @@ const app = Vue.createApp({
       go,
     }
   },
+})
+
+injectStyle(css`
+  .image-that-doesnt-display-at-first-but-fades-in-once-loaded {
+    opacity: 0;
+    transition: 0.2s opacity;
+  }
+  .image-that-doesnt-display-at-first-but-fades-in-once-loaded[data-loaded="1"] {
+    opacity: 1;
+  }
+`)
+app.component("image-that-doesnt-display-at-first-but-fades-in-once-loaded", {
+  props: {
+    src: {},
+  },
+  template: html`<img
+    class="image-that-doesnt-display-at-first-but-fades-in-once-loaded"
+    loading="lazy"
+    :src="src"
+    @load="$refs.image && $refs.image.setAttribute('data-loaded', '1')"
+    ref="image"
+  />`,
 })
 
 injectStyle(css`
