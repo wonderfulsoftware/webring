@@ -205,7 +205,7 @@ const app = Vue.createApp({
               {{ link.siteData && link.siteData.description }}
             </p>
             <p>
-              <a :href="link.url" class="info-link">
+              <a :href="link.url" class="info-link" @click="go(link)">
                 <blurhash-image
                   v-if="link.siteData && link.siteData.blurhash"
                   :blurhash="link.siteData.blurhash"
@@ -230,6 +230,8 @@ const app = Vue.createApp({
     const currentLink = Vue.ref()
 
     let needsInboundTransition = false
+    let inboundReferrer = ""
+
     const viewingLinks = Vue.reactive({})
     Vue.watch(
       () => currentLink.value,
@@ -297,6 +299,7 @@ const app = Vue.createApp({
           currentLink.value = link
           hidingListOnMobile.value = false
           location.hash = "#/" + id
+          sendGtagEvent("view", "link", id)
         }
         const data = Vue.computed(() => siteData[id])
         const link = Vue.reactive({
@@ -317,6 +320,48 @@ const app = Vue.createApp({
       }
     )
 
+    /**
+     * Sends non-essential tracking event, e.g. button clicks, to Google Analytics,
+     * for collecting usage statistics with no personalization.
+     */
+    const sendGtagEvent = (action, category, label, value) => {
+      try {
+        if (!window.gtag) return
+        gtag("event", action, {
+          event_category: category,
+          event_label: label,
+          value: value,
+        })
+      } catch (e) {
+        console.error("Unable to send gtag", e)
+      }
+    }
+
+    /**
+     * Sends important beacons about how the webring is functioning.
+     * Data is completely anonymous.
+     */
+    const sendBeacon = (action, site, referrer = "") => {
+      try {
+        if (navigator.sendBeacon) {
+          const query = new URLSearchParams()
+          query.set("hostname", location.hostname)
+          query.set("action", action)
+          query.set("site", site)
+          // In HTTP, "Referer" is a standardized misspelling of the English word "referrer".
+          // See: https://en.wikipedia.org/wiki/HTTP_referer
+          query.set("referer", referrer)
+          const body = new URLSearchParams()
+          body.set("t", new Date().toJSON())
+          navigator.sendBeacon(
+            `https://us-central1-wonderful-software.cloudfunctions.net/webring-notify?${query}`,
+            body
+          )
+        }
+      } catch (e) {
+        console.error("Unable to send beacon", e)
+      }
+    }
     const processInboundLink = () => {
       const hash = location.hash
       if (hash.startsWith("#") && !hash.startsWith("#/")) {
@@ -324,7 +369,9 @@ const app = Vue.createApp({
         location.replace("#/" + id)
         const matchedLink = links.find((l) => l.id === id)
         if (matchedLink) {
+          sendBeacon("inbound", matchedLink.id)
           needsInboundTransition = true
+          inboundReferrer = matchedLink.id
           return true
         }
       }
@@ -339,19 +386,25 @@ const app = Vue.createApp({
         hidingListOnMobile.value = true
       }
     }
+    const go = (link) => {
+      sendBeacon("outbound", link.id, inboundReferrer)
+    }
 
     const previous = () => {
       let index = currentLink.value ? currentLink.value.index : 0
       index = (index + links.length - 1) % links.length
       links[index].select()
+      sendGtagEvent("previous", "button")
     }
     const random = () => {
       links[~~(Math.random() * links.length)].select()
+      sendGtagEvent("random", "button")
     }
     const next = () => {
       let index =
         ((currentLink.value ? currentLink.value.index : -1) + 1) % links.length
       links[index].select()
+      sendGtagEvent("next", "button")
     }
 
     const showList = () => {
@@ -409,6 +462,7 @@ const app = Vue.createApp({
       showList,
       hidingListOnMobile,
       viewingLinks,
+      go,
     }
   },
 })
