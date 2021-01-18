@@ -1,6 +1,9 @@
 name: Update stats
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - main
 jobs:
   update:
     runs-on: ubuntu-20.04
