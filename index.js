@@ -365,7 +365,7 @@ const app = Vue.createApp({
     const processInboundLink = () => {
       const hash = location.hash
       if (hash.startsWith("#") && !hash.startsWith("#/")) {
-        const id = ((hash.match(/[a-z0-9\.-]+/) || [])[0] || "").toLowerCase()
+        const id = ((hash.match(/[a-z0-9\.-]+/i) || [])[0] || "").toLowerCase()
         location.replace("#/" + id)
         const matchedLink = links.find((l) => l.id === id)
         if (matchedLink) {
