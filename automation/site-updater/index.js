@@ -29,6 +29,9 @@ const siteFetcherInstanceBase = encrypted(`
     const data = db[site.id] || {}
     console.log(site.id)
     try {
+      if (data.url !== site.url) {
+        data.url = site.url
+      }
       if (
         !data.lastUpdated ||
         data.lastUpdated < new Date(Date.now() - 86400e3).toJSON()
