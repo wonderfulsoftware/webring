@@ -230,6 +230,8 @@ const app = Vue.createApp({
     const currentLink = Vue.ref()
 
     let needsInboundTransition = false
+    let inboundReferrer = ""
+
     const viewingLinks = Vue.reactive({})
     Vue.watch(
       () => currentLink.value,
@@ -317,6 +319,11 @@ const app = Vue.createApp({
         return link
       }
     )
+
+    /**
+     * Sends non-essential tracking event, e.g. button clicks, to Google Analytics,
+     * for collecting usage statistics with no personalization.
+     */
     const sendGtagEvent = (action, category, label, value) => {
       try {
         if (!window.gtag) return
@@ -329,13 +336,21 @@ const app = Vue.createApp({
         console.error("Unable to send gtag", e)
       }
     }
-    const sendEvent = (action, site) => {
+
+    /**
+     * Sends important beacons about how the webring is functioning.
+     * Data is completely anonymous.
+     */
+    const sendBeacon = (action, site, referrer = "") => {
       try {
         if (navigator.sendBeacon) {
           const query = new URLSearchParams()
           query.set("hostname", location.hostname)
           query.set("action", action)
           query.set("site", site)
+          // In HTTP, "Referer" is a standardized misspelling of the English word "referrer".
+          // See: https://en.wikipedia.org/wiki/HTTP_referer
+          query.set("referer", referrer)
           const body = new URLSearchParams()
           body.set("t", new Date().toJSON())
           navigator.sendBeacon(
@@ -354,8 +369,9 @@ const app = Vue.createApp({
         location.replace("#/" + id)
         const matchedLink = links.find((l) => l.id === id)
         if (matchedLink) {
-          sendEvent("inbound", matchedLink.id)
+          sendBeacon("inbound", matchedLink.id)
           needsInboundTransition = true
+          inboundReferrer = matchedLink.id
           return true
         }
       }
@@ -371,7 +387,7 @@ const app = Vue.createApp({
       }
     }
     const go = (link) => {
-      sendEvent("outbound", link.id)
+      sendBeacon("outbound", link.id, inboundReferrer)
     }
 
     const previous = () => {
