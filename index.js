@@ -205,7 +205,7 @@ const app = Vue.createApp({
               {{ link.siteData && link.siteData.description }}
             </p>
             <p>
-              <a :href="link.url" class="info-link">
+              <a :href="link.url" class="info-link" @click="go(link)">
                 <blurhash-image
                   v-if="link.siteData && link.siteData.blurhash"
                   :blurhash="link.siteData.blurhash"
@@ -316,7 +316,24 @@ const app = Vue.createApp({
         return link
       }
     )
-
+    const sendEvent = (action, site) => {
+      try {
+        if (navigator.sendBeacon) {
+          const query = new URLSearchParams()
+          query.set("hostname", location.hostname)
+          query.set("action", action)
+          query.set("site", site)
+          const body = new URLSearchParams()
+          body.set("t", new Date().toJSON())
+          navigator.sendBeacon(
+            `https://us-central1-wonderful-software.cloudfunctions.net/webring-notify?${query}`,
+            body
+          )
+        }
+      } catch (e) {
+        console.error("Unable to send beacon", e)
+      }
+    }
     const processInboundLink = () => {
       const hash = location.hash
       if (hash.startsWith("#") && !hash.startsWith("#/")) {
@@ -324,6 +341,7 @@ const app = Vue.createApp({
         location.replace("#/" + id)
         const matchedLink = links.find((l) => l.id === id)
         if (matchedLink) {
+          sendEvent("inbound", matchedLink.id)
           needsInboundTransition = true
           return true
         }
@@ -338,6 +356,9 @@ const app = Vue.createApp({
       } else if (hash === "#/list") {
         hidingListOnMobile.value = true
       }
+    }
+    const go = (link) => {
+      sendEvent("outbound", link.id)
     }
 
     const previous = () => {
@@ -409,6 +430,7 @@ const app = Vue.createApp({
       showList,
       hidingListOnMobile,
       viewingLinks,
+      go,
     }
   },
 })
