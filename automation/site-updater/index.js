@@ -16,14 +16,20 @@ const siteFetcherInstanceBase = encrypted(`
     fs.readFileSync("tmp/webring-site-data/data.json", "utf8")
   )
   const $ = cheerio.load(fs.readFileSync("index.html", "utf8"))
-  /** @type {{id: string, url: string}[]}*/
+  /** @type {{id: string, url: string, number: number}[]}*/
   const sites = []
+  let nextNumber = 0
   for (const site of Array.from($("#ring li[id]"))) {
     sites.push({
       id: $(site).attr("id"),
       url: $(site).find("a").attr("href"),
+      number: nextNumber++,
     })
   }
+
+  Object.values(db).forEach((data) => {
+    delete data.number
+  })
 
   for (const site of sites) {
     const data = db[site.id] || {}
@@ -31,6 +37,9 @@ const siteFetcherInstanceBase = encrypted(`
     try {
       if (data.url !== site.url) {
         data.url = site.url
+      }
+      if (data.number !== site.number) {
+        data.number = site.number
       }
       if (
         !data.lastUpdated ||
