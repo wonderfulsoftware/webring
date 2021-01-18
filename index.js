@@ -297,6 +297,7 @@ const app = Vue.createApp({
           currentLink.value = link
           hidingListOnMobile.value = false
           location.hash = "#/" + id
+          sendGtagEvent("view", "link", id)
         }
         const data = Vue.computed(() => siteData[id])
         const link = Vue.reactive({
@@ -316,6 +317,18 @@ const app = Vue.createApp({
         return link
       }
     )
+    const sendGtagEvent = (action, category, label, value) => {
+      try {
+        if (!window.gtag) return
+        gtag("event", action, {
+          event_category: category,
+          event_label: label,
+          value: value,
+        })
+      } catch (e) {
+        console.error("Unable to send gtag", e)
+      }
+    }
     const sendEvent = (action, site) => {
       try {
         if (navigator.sendBeacon) {
@@ -365,14 +378,17 @@ const app = Vue.createApp({
       let index = currentLink.value ? currentLink.value.index : 0
       index = (index + links.length - 1) % links.length
       links[index].select()
+      sendGtagEvent("previous", "button")
     }
     const random = () => {
       links[~~(Math.random() * links.length)].select()
+      sendGtagEvent("random", "button")
     }
     const next = () => {
       let index =
         ((currentLink.value ? currentLink.value.index : -1) + 1) % links.length
       links[index].select()
+      sendGtagEvent("next", "button")
     }
 
     const showList = () => {
