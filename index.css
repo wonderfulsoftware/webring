@@ -55,26 +55,27 @@ main {
 }
 @media (min-width: 960px) {
   main {
-    max-width: auto;
     margin-left: 0;
     margin-right: 420px;
   }
 }
 
 #about {
-  color: #888583;
   margin-left: 42px;
   margin-top: 48px;
 }
-#about a {
+.dim {
+  color: #888583;
+}
+.dim a {
   color: inherit;
   opacity: 0.8;
 }
-#about a::before {
+.dim a::before {
   content: "[";
   opacity: 0.5;
 }
-#about a::after {
+.dim a::after {
   content: "]";
   opacity: 0.5;
 }
@@ -84,7 +85,7 @@ main {
 }
 #ring li {
   padding-left: 6px;
-  margin: 8px 0;
+  margin: 0 0 8px;
 }
 #ring a {
   margin: -3px;
@@ -93,10 +94,37 @@ main {
   border-radius: 3px;
   transition: 0.5s all;
 }
-#ring li[data-was-selected] a {
+#ring li[data-current] a {
   box-shadow: 0 0 7px #da356777;
 }
+#ring li[data-current] a,
 #ring li:target a {
   background: #da3567;
   color: #fff;
+}
+
+@media (min-width: 960px) {
+  #ring {
+    column-count: 2;
+  }
+}
+
+/* 
+#ring {
+  display: flex;
+  padding-left: 0;
+  flex-wrap: wrap;
+  color: #888583;
+}
+#ring li {
+  margin-left: 36px;
+  margin-bottom: 0;
+}
+*/
+
+footer {
+  border-top: 1px solid #f5f4f3;
+  margin-left: 42px;
+  margin-bottom: 2em;
+  font-size: 0.9rem;
 }

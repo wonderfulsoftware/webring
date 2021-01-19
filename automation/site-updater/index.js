@@ -16,19 +16,31 @@ const siteFetcherInstanceBase = encrypted(`
     fs.readFileSync("tmp/webring-site-data/data.json", "utf8")
   )
   const $ = cheerio.load(fs.readFileSync("index.html", "utf8"))
-  /** @type {{id: string, url: string}[]}*/
+  /** @type {{id: string, url: string, number: number}[]}*/
   const sites = []
+  let nextNumber = 0
   for (const site of Array.from($("#ring li[id]"))) {
     sites.push({
       id: $(site).attr("id"),
       url: $(site).find("a").attr("href"),
+      number: nextNumber++,
     })
   }
+
+  Object.values(db).forEach((data) => {
+    delete data.number
+  })
 
   for (const site of sites) {
     const data = db[site.id] || {}
     console.log(site.id)
     try {
+      if (data.url !== site.url) {
+        data.url = site.url
+      }
+      if (data.number !== site.number) {
+        data.number = site.number
+      }
       if (
         !data.lastUpdated ||
         data.lastUpdated < new Date(Date.now() - 86400e3).toJSON()
@@ -50,11 +62,12 @@ const siteFetcherInstanceBase = encrypted(`
         if (!existingImage || areImagesDifferent(existingImage, newImage)) {
           fs.writeFileSync(imagePath, newImageBuffer)
           console.log("Written", imagePath)
+          data.mobileImageUrlV2 = `https://wonderfulsoftware.github.io/webring-site-screenshots/${imageBasename}`
+          data.blurhash = fetchResult.blurhash
+          data.screenshotUpdatedAt = new Date().toJSON()
         }
-        data.blurhash = fetchResult.blurhash
         data.description = fetchResult.description
         data.backlink = fetchResult.backlink
-        data.mobileImageUrlV2 = `https://wonderfulsoftware.github.io/webring-site-screenshots/${imageBasename}`
         data.lastUpdated = new Date().toJSON()
         console.log(data)
       }
