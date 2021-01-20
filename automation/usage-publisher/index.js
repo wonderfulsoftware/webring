@@ -4,11 +4,15 @@ const targetIndex = stats.xValues.indexOf(targetDate)
 if (targetIndex === -1) {
   throw new Error(`Data for ${targetDate} not found.`)
 }
-
+const stat = {}
 for (const [i, meta] of stats.seriesMeta.entries()) {
   const [to, from] = meta.eventGroupBys
   const count = stats.series[i][targetIndex].value
   if (count > 0 && from !== "(none)") {
-    console.log([targetDate, from, to, count].join("\t"))
+    if (!stat[from]) {
+      stat[from] = {}
+    }
+    stat[from][to] = count
   }
 }
+console.log(stat)
