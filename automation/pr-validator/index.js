@@ -21,8 +21,20 @@ const captureEndpointUrl = encrypted(`
 
 ;(async () => {
   const url = process.argv[2]
+  const fetchResult = await fetchSiteInfo(url)
+  const ephemeralScreenshotUrl = generateEphemeralUrl(url)
+  const persistentScreenshotUrl = await persistScreenshot(
+    ephemeralScreenshotUrl
+  )
+  const text = generateCommentText(fetchResult, persistentScreenshotUrl)
+  const commentResult = await createOrUpdateGitHubComment(text)
+  console.log(commentResult.data.html_url)
+})()
 
-  // Fetch site info
+/**
+ * @param {string} url
+ */
+async function fetchSiteInfo(url) {
   const siteFetchingResponse = await axios.get(siteFetcherInstanceBase, {
     params: {
       url: url,
@@ -31,58 +43,84 @@ const captureEndpointUrl = encrypted(`
     },
   })
   const fetchResult = siteFetchingResponse.data
+  return fetchResult
+}
 
-  // Generate ephemeral screenshot URL
-  const ssurl =
+/**
+ * @param {string} url
+ */
+function generateEphemeralUrl(url) {
+  return (
     siteFetcherInstanceBase +
     "?" +
     new URLSearchParams({
       url: url,
       key: process.env.SITE_FETCHER_API_KEY,
     })
+  )
+}
 
-  // Generate persistent screenshot URL
+/**
+ * @param {string} ephemeralScreenshotUrl
+ */
+async function persistScreenshot(ephemeralScreenshotUrl) {
   const destKey = [
     "wonderfulsoftware/webring/pr-validator",
     ...new Date().toJSON().split("T")[0].split("-"),
-    require("crypto").createHash("md5").update(ssurl).digest("hex") + ".png",
+    require("crypto")
+      .createHash("md5")
+      .update(ephemeralScreenshotUrl)
+      .digest("hex") + ".png",
   ].join("/")
 
   // Make screenshot persistent
   await axios.post(captureEndpointUrl, {
-    src: ssurl,
+    src: ephemeralScreenshotUrl,
     dest: destKey,
   })
 
-  const text = []
-  text.push("## PR validation result", "", "**Backlink:**")
+  const persistentScreenshotUrl =
+    "https://webshots.blob.core.windows.net/webshots/" + destKey
+  return persistentScreenshotUrl
+}
+
+/**
+ * @param {{ backlink: { href: string; }; description: string; }} fetchResult
+ * @param {string} persistentScreenshotUrl
+ */
+function generateCommentText(fetchResult, persistentScreenshotUrl) {
+  const lines = []
+  lines.push("## PR validation result", "", "**Backlink:**")
 
   if (!fetchResult.backlink) {
-    text.push("- ❌ No backlink found.")
+    lines.push("- ❌ No backlink found.")
   } else if (fetchResult.backlink.href.includes("#/")) {
     const domain = fetchResult.backlink.href.split("#")[1]
     const before = `#${domain}`
     const after = `#${domain.slice(1)}`
-    text.push(
+    lines.push(
       `- ⚠ Found backlink, however, please change \`${before}\` to just \`#${after}\` for correct linking.`
     )
   } else {
-    text.push(`- ✅ Found backlink to ${fetchResult.backlink.href}.`)
+    lines.push(`- ✅ Found backlink to ${fetchResult.backlink.href}.`)
   }
-  text.push("", "**Site description:**")
+  lines.push("", "**Site description:**")
   if (!fetchResult.description) {
-    text.push(
+    lines.push(
       '- ℹ No site description found. Consider adding `<meta property="og:description">` or `<meta name="description">` to your website to site description show up on the webring page.'
     )
   } else {
-    text.push(`- ✅ ${escape(fetchResult.description)}`)
+    lines.push(`- ✅ ${escape(fetchResult.description)}`)
   }
-  text.push(
-    "",
-    "**Screenshot:**",
-    "- ![](https://webshots.blob.core.windows.net/webshots/" + destKey
-  )
+  lines.push("", "**Screenshot:**", "- ![](" + persistentScreenshotUrl + ")")
+  const text = lines.join("\n")
+  return text
+}
 
+/**
+ * @param {string} text
+ */
+async function createOrUpdateGitHubComment(text) {
   const gh = new Octokit({
     auth: process.env.BOT_GH_TOKEN,
   })
@@ -98,13 +136,13 @@ const captureEndpointUrl = encrypted(`
     commentResult = await gh.issues.updateComment({
       ...issue,
       comment_id: found.id,
-      body: text.join("\n"),
+      body: text,
     })
   } else {
     commentResult = await gh.issues.createComment({
       ...issue,
-      body: text.join("\n"),
+      body: text,
     })
   }
-  console.log(commentResult.data.html_url)
-})()
+  return commentResult
+}
