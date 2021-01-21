@@ -35,15 +35,19 @@ injectStyle(css`
     bottom: 0;
     left: 0;
     pointer-events: none;
-    background: linear-gradient(to bottom, #fff0, #fff);
+    background: linear-gradient(to bottom, #fff0, #fffd, #fff);
   }
   @media (min-width: 960px) {
     #aux {
       top: 20px;
-      width: 360px;
+      width: 375px;
       left: auto;
       padding: 14px 20px 12px;
       border-left: 1px solid #f5f4f3;
+    }
+    #aux::after {
+      height: 128px;
+      background: linear-gradient(to bottom, #fff0, #fff);
     }
     .--hide-on-mobile#aux {
       opacity: 1;
@@ -56,16 +60,39 @@ injectStyle(css`
     margin: 0 auto;
   }
 
+  .site-info__toolbar {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    right: 24px;
+    z-index: 95;
+  }
+  @media (min-width: 960px) {
+    .site-info__toolbar {
+      position: relative;
+      bottom: unset;
+      left: unset;
+      right: unset;
+    }
+  }
+
   .site-info-item {
     position: absolute;
-    top: 42px;
+    top: 0px;
     right: 20px;
     left: 20px;
+    text-align: center;
     transition: 0.3s transform, 0.3s opacity;
   }
   .site-info-item__body {
     max-width: 360px;
     margin: 0 auto;
+  }
+  @media (min-width: 960px) {
+    .site-info-item {
+      top: 80px;
+      text-align: left;
+    }
   }
 
   h2 {
@@ -145,26 +172,6 @@ injectStyle(css`
     padding: 8px 16px;
     border-radius: 100px;
   }
-  #site-nav {
-    display: flex;
-    margin-left: -0.3rem;
-  }
-  #site-nav button {
-    margin-left: 0.3rem;
-    padding: 5px 7px;
-    background: transparent;
-    border: 1px solid #e9e8e7;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  #site-nav #show-list-button {
-    margin-left: auto;
-  }
-  @media (min-width: 960px) {
-    #site-nav #show-list-button {
-      display: none;
-    }
-  }
 
   /* https://github.com/dtinth/blurhash-image */
   blurhash-image {
@@ -187,12 +194,9 @@ const app = Vue.createApp({
       :class="{'--hide-on-mobile': hidingListOnMobile}"
     >
       <div id="site-info">
-        <nav id="site-nav">
-          <button @click="previous">&laquo; previous</button>
-          <button @click="random">random</button>
-          <button @click="next">next &raquo;</button>
-          <button @click="showList" id="show-list-button">list</button>
-        </nav>
+        <div class="site-info__toolbar">
+          <webring-toolbar @previous="previous" @random="random" @next="next" />
+        </div>
         <div
           class="site-info-item"
           v-for="({link, style}, id) of viewingLinks"
@@ -562,6 +566,85 @@ app.component("for-first-timer", {
     }
     return { hide, acknowledge, button }
   },
+})
+
+injectStyle(css`
+  .webring-toolbar {
+    border: 1px solid #d9d8d7;
+    border-radius: 3px;
+    box-shadow: 0 1px 7px #0002;
+    overflow: hidden;
+  }
+  .webring-toolbar-actions {
+    display: flex;
+    background: #e9e8e7;
+    gap: 1px;
+  }
+`)
+
+app.component("webring-toolbar", {
+  props: {},
+  template: html`<div class="webring-toolbar">
+    <div class="webring-toolbar-actions">
+      <!-- Icons from the IcoMoon Free pack, CC BY 4.0 - https://github.com/Keyamoon/IcoMoon-Free -->
+      <webring-toolbar-button
+        @click="$emit('previous')"
+        icon="M12.586 27.414l-10-10c-0.781-0.781-0.781-2.047 0-2.828l10-10c0.781-0.781 2.047-0.781 2.828 0s0.781 2.047 0 2.828l-6.586 6.586h19.172c1.105 0 2 0.895 2 2s-0.895 2-2 2h-19.172l6.586 6.586c0.39 0.39 0.586 0.902 0.586 1.414s-0.195 1.024-0.586 1.414c-0.781 0.781-2.047 0.781-2.828 0z"
+      >
+        Previous
+      </webring-toolbar-button>
+      <webring-toolbar-button
+        @click="$emit('random')"
+        icon="M24 22h-3.172l-5-5 5-5h3.172v5l7-7-7-7v5h-4c-0.53 0-1.039 0.211-1.414 0.586l-5.586 5.586-5.586-5.586c-0.375-0.375-0.884-0.586-1.414-0.586h-6v4h5.172l5 5-5 5h-5.172v4h6c0.53 0 1.039-0.211 1.414-0.586l5.586-5.586 5.586 5.586c0.375 0.375 0.884 0.586 1.414 0.586h4v5l7-7-7-7v5z"
+      >
+        Random
+      </webring-toolbar-button>
+      <webring-toolbar-button
+        @click="$emit('next')"
+        icon="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"
+      >
+        Next
+      </webring-toolbar-button>
+    </div>
+  </div>`,
+})
+
+injectStyle(css`
+  .webring-toolbar-button {
+    border: 0;
+    width: 33%;
+    flex: 1;
+    font: inherit;
+    background: linear-gradient(to bottom, white, #f5f4f3);
+    cursor: pointer;
+    padding: 8px 0;
+    text-align: center;
+    color: #353435;
+  }
+  .webring-toolbar-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  .webring-toolbar-button__text {
+    display: block;
+    font-size: 0.85em;
+    line-height: 1em;
+  }
+`)
+app.component("webring-toolbar-button", {
+  props: {
+    icon: {
+      type: String,
+    },
+  },
+  template: html`<button class="webring-toolbar-button">
+    <svg viewBox="0 0 32 32">
+      <path :d="icon" fill="currentColor" />
+    </svg>
+    <span class="webring-toolbar-button__text">
+      <slot></slot>
+    </span>
+  </button>`,
 })
 
 const instance = app.mount("#app")
