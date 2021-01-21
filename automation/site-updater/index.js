@@ -43,7 +43,7 @@ const siteFetcherInstanceBase = encrypted(`
       }
       if (
         !data.lastUpdated ||
-        data.lastUpdated < new Date(Date.now() - 86400e3).toJSON()
+        data.lastUpdated < new Date(Date.now() - 3600e3 * 20).toJSON()
       ) {
         const siteFetchingResponse = await axios.get(siteFetcherInstanceBase, {
           params: {
