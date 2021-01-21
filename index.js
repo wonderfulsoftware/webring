@@ -195,7 +195,13 @@ const app = Vue.createApp({
     >
       <div id="site-info">
         <div class="site-info__toolbar">
-          <webring-toolbar @previous="previous" @random="random" @next="next" />
+          <webring-toolbar
+            @previous="previous"
+            @random="random"
+            @next="next"
+            :autoNext="autoNext"
+            :autoRandom="autoRandom"
+          />
         </div>
         <div
           class="site-info-item"
@@ -231,6 +237,8 @@ const app = Vue.createApp({
   `,
   setup() {
     const currentLink = Vue.ref()
+    const autoNext = Vue.ref(false)
+    const autoRandom = Vue.ref(false)
 
     let needsInboundTransition = false
     let inboundReferrer = ""
@@ -419,11 +427,13 @@ const app = Vue.createApp({
       const inbound = processInboundLink()
       updateCurrentLink()
       if (!currentLink.value && location.hash !== "#/list") {
+        autoRandom.value = true
         random()
       }
       if (inbound) {
         setTimeout(() => {
           next()
+          autoNext.value = true
         }, 500)
       }
       window.addEventListener("hashchange", () => {
@@ -466,6 +476,8 @@ const app = Vue.createApp({
       hidingListOnMobile,
       viewingLinks,
       go,
+      autoNext,
+      autoRandom,
     }
   },
 })
@@ -550,11 +562,9 @@ app.component("for-first-timer", {
     Vue.onMounted(() => {
       console.log(localStorage.WEBRING_ACKNOWLEDGED)
       if (!localStorage.WEBRING_ACKNOWLEDGED) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            hide.value = false
-          })
-        })
+        setTimeout(() => {
+          hide.value = false
+        }, 1000)
       }
     })
     const acknowledge = () => {
@@ -575,17 +585,31 @@ injectStyle(css`
     box-shadow: 0 1px 7px #0002;
     overflow: hidden;
   }
-  .webring-toolbar-actions {
+  .webring-toolbar__actions {
     display: flex;
     background: #e9e8e7;
     gap: 1px;
   }
+  .webring-toolbar__info {
+    background: #e9e8e7;
+    border-bottom: 1px solid #d9d8d7;
+    padding: 4px;
+    font-size: 0.9em;
+  }
+  @media (min-width: 960px) {
+    .webring-toolbar__mobile-only-action {
+      display: none;
+    }
+  }
 `)
 
 app.component("webring-toolbar", {
-  props: {},
+  props: {
+    autoNext: Boolean,
+    autoRandom: Boolean,
+  },
   template: html`<div class="webring-toolbar">
-    <div class="webring-toolbar-actions">
+    <div class="webring-toolbar__actions">
       <!-- Icons from the IcoMoon Free pack, CC BY 4.0 - https://github.com/Keyamoon/IcoMoon-Free -->
       <webring-toolbar-button
         @click="$emit('previous')"
@@ -593,15 +617,27 @@ app.component("webring-toolbar", {
       >
         Previous
       </webring-toolbar-button>
+
+      <webring-toolbar-button
+        @click="$emit('list')"
+        class="webring-toolbar__mobile-only-action"
+        icon="M12 2h20v4h-20v-4zM12 14h20v4h-20v-4zM12 26h20v4h-20v-4zM0 4c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4zM0 16c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4zM0 28c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4z"
+      >
+        List
+      </webring-toolbar-button>
+
       <webring-toolbar-button
         @click="$emit('random')"
         icon="M24 22h-3.172l-5-5 5-5h3.172v5l7-7-7-7v5h-4c-0.53 0-1.039 0.211-1.414 0.586l-5.586 5.586-5.586-5.586c-0.375-0.375-0.884-0.586-1.414-0.586h-6v4h5.172l5 5-5 5h-5.172v4h6c0.53 0 1.039-0.211 1.414-0.586l5.586-5.586 5.586 5.586c0.375 0.375 0.884 0.586 1.414 0.586h4v5l7-7-7-7v5z"
+        :flash="autoRandom"
       >
         Random
       </webring-toolbar-button>
+
       <webring-toolbar-button
         @click="$emit('next')"
         icon="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"
+        :flash="autoNext"
       >
         Next
       </webring-toolbar-button>
@@ -620,15 +656,52 @@ injectStyle(css`
     padding: 8px 0;
     text-align: center;
     color: #353435;
+    --flash-opacity: 0;
+    position: relative;
+  }
+  .webring-toolbar-button::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: "";
+    display: block;
+    background: #da3567;
+    opacity: var(--flash-opacity);
+  }
+  .webring-toolbar-button[data-flash="1"] {
+    animation: 0.5s webring-toolbar-button__flash;
+  }
+  .webring-toolbar-button[data-flash="1"]::before {
+    animation: 0.5s webring-toolbar-button__flash-bg;
   }
   .webring-toolbar-button svg {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
+    position: relative;
   }
   .webring-toolbar-button__text {
     display: block;
     font-size: 0.85em;
     line-height: 1em;
+    position: relative;
+  }
+  @keyframes webring-toolbar-button__flash {
+    from {
+      color: #fff;
+    }
+    to {
+      color: #353435;
+    }
+  }
+  @keyframes webring-toolbar-button__flash-bg {
+    from {
+      opacity: 1;
+    }
+    to {
+      color: #353435;
+    }
   }
 `)
 app.component("webring-toolbar-button", {
@@ -636,8 +709,14 @@ app.component("webring-toolbar-button", {
     icon: {
       type: String,
     },
+    flash: {
+      type: Boolean,
+    },
   },
-  template: html`<button class="webring-toolbar-button">
+  template: html`<button
+    class="webring-toolbar-button"
+    :data-flash="flash ? 1 : 0"
+  >
     <svg viewBox="0 0 32 32">
       <path :d="icon" fill="currentColor" />
     </svg>
