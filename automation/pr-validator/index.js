@@ -22,11 +22,14 @@ const captureEndpointUrl = encrypted(`
 ;(async () => {
   const url = process.argv[2]
   const fetchResult = await fetchSiteInfo(url)
+  console.log("Loading site info...")
   const ephemeralScreenshotUrl = generateEphemeralUrl(url)
+  console.log("Persisting screenshot...")
   const persistentScreenshotUrl = await persistScreenshot(
     ephemeralScreenshotUrl
   )
   const text = generateCommentText(fetchResult, persistentScreenshotUrl)
+  console.log("Posting comment...")
   const commentResult = await createOrUpdateGitHubComment(text)
   console.log(commentResult.data.html_url)
 })()
