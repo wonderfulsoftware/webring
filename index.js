@@ -199,6 +199,7 @@ const app = Vue.createApp({
             @previous="previous"
             @random="random"
             @next="next"
+            @list="showList"
             :autoNext="autoNext"
             :autoRandom="autoRandom"
           />
