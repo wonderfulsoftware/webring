@@ -104,6 +104,10 @@ function generateCommentText(fetchResult, persistentScreenshotUrl) {
     lines.push(
       `- ⚠ Found backlink, however, please change \`${before}\` to just \`#${after}\` for correct linking.`
     )
+  } else if (fetchResult.backlink.href.match(/YOUR\.DOMAIN/i)) {
+    lines.push(
+      `- ⚠ Found backlink, however, please change \`YOUR.DOMAIN\` to your actual domain for correct linking.`
+    )
   } else {
     lines.push(`- ✅ Found backlink to ${fetchResult.backlink.href}.`)
   }
