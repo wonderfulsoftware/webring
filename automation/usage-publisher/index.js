@@ -6,7 +6,7 @@ const output = []
 for (const [targetIndex, targetDate] of stats.xValues.entries()) {
   if (targetDate < "2021-01-24") continue
   const stat = {}
-  const summary = { total: 0, network: 0, external: 0 }
+  const summary = { total: 0, ring: 0, external: 0 }
   for (const [i, meta] of stats.seriesMeta.entries()) {
     const [to, from] = meta.eventGroupBys
     const count = stats.series[i][targetIndex].value
