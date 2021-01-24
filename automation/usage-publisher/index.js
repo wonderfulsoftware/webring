@@ -17,7 +17,7 @@ for (const [targetIndex, targetDate] of stats.xValues.entries()) {
       stat[from][to] = count
     }
     summary.total += count
-    summary[from === "(none)" ? "external" : "network"] += count
+    summary[from === "(none)" ? "external" : "ring"] += count
   }
   data[targetDate] = summary
 }
