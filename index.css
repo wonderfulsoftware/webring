@@ -63,6 +63,7 @@ main {
 #about {
   margin-left: 42px;
   margin-top: 48px;
+  max-width: 598px;
 }
 .dim {
   color: #888583;
