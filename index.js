@@ -730,7 +730,7 @@ function useViewingLinks(currentLink, transitionInfo) {
  * Sends non-essential tracking event, e.g. button clicks, to Google Analytics,
  * for collecting usage statistics with no personalization.
  */
-const sendGtagEvent = (action, category, label, value) => {
+function sendGtagEvent(action, category, label, value) {
   try {
     if (!window.gtag) return
     gtag("event", action, {
@@ -747,7 +747,7 @@ const sendGtagEvent = (action, category, label, value) => {
  * Sends important beacons about how the webring is functioning.
  * Data is completely anonymous.
  */
-const sendBeacon = (action, site, referrer = "") => {
+function sendBeacon(action, site, referrer = "") {
   try {
     if (navigator.sendBeacon) {
       const query = new URLSearchParams()
