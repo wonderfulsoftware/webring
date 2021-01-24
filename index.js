@@ -147,140 +147,19 @@ const components = {
       const currentLink = Vue.ref()
       const autoNext = Vue.ref(false)
       const autoRandom = Vue.ref(false)
-
-      let needsInboundTransition = false
+      const transitionInfo = {
+        needsInboundTransition: false,
+      }
       let inboundReferrer = ""
-
-      const viewingLinks = Vue.reactive({})
-      Vue.watch(
-        () => currentLink.value,
-        (link, previous) => {
-          let exitTransform = "scale(0.5)"
-          if (link) {
-            let enterTransform = "scale(0.5)"
-            if (needsInboundTransition) {
-              enterTransform = "scale(1.5)"
-              needsInboundTransition = false
-            }
-            if (previous) {
-              enterTransform = `translateX(${
-                link.index > previous.index ? 100 : -100
-              }%)`
-              exitTransform = `translateX(${
-                link.index > previous.index ? -100 : 100
-              }%)`
-            }
-            const view = Vue.reactive({
-              link,
-              style: {
-                opacity: 0,
-                transform: enterTransform,
-              },
-            })
-            viewingLinks[link.id] = view
-            Vue.nextTick(() => {
-              requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                  view.style.opacity = 1
-                  view.style.transform = ""
-                })
-              })
-            })
-          }
-          for (const key of Object.keys(viewingLinks)) {
-            if (key !== link.id) {
-              const view = viewingLinks[key]
-              if (view && !view.transitioningOut) {
-                view.transitioningOut = true
-                view.style.opacity = 0
-                view.style.transform = exitTransform
-                view.style.pointerEvents = "none"
-                setTimeout(() => {
-                  if (viewingLinks[key] === view) {
-                    delete viewingLinks[key]
-                  }
-                }, 1000)
-              }
-            }
-          }
-        },
-        { immediate: true }
-      )
-
+      const viewingLinks = useViewingLinks(currentLink, transitionInfo)
       const hidingListOnMobile = Vue.ref(true)
-      const links = Array.from(document.querySelectorAll("#ring > li")).map(
-        (li, index) => {
-          const id = li.id
-          const a = li.querySelector("a")
-          const url = a.href
-          const text = a.innerText
-          const select = () => {
-            currentLink.value = link
-            hidingListOnMobile.value = false
-            location.hash = "#/" + id
-            sendGtagEvent("view", "link", id)
-          }
-          const data = Vue.computed(() => siteData[id])
-          const link = Vue.reactive({
-            id,
-            text,
-            url,
-            a,
-            li,
-            select,
-            siteData: data,
-            index,
-          })
-          a.addEventListener("click", (e) => {
-            e.preventDefault()
-            select()
-          })
-          return link
-        }
-      )
-
-      /**
-       * Sends non-essential tracking event, e.g. button clicks, to Google Analytics,
-       * for collecting usage statistics with no personalization.
-       */
-      const sendGtagEvent = (action, category, label, value) => {
-        try {
-          if (!window.gtag) return
-          gtag("event", action, {
-            event_category: category,
-            event_label: label,
-            value: value,
-          })
-        } catch (e) {
-          console.error("Unable to send gtag", e)
-        }
+      const onLinkSelected = (link) => {
+        currentLink.value = link
+        hidingListOnMobile.value = false
+        sendGtagEvent("view", "link", link.id)
       }
+      const links = processLinksInDOM({ onLinkSelected })
 
-      /**
-       * Sends important beacons about how the webring is functioning.
-       * Data is completely anonymous.
-       */
-      const sendBeacon = (action, site, referrer = "") => {
-        try {
-          if (navigator.sendBeacon) {
-            const query = new URLSearchParams()
-            query.set("hostname", location.hostname)
-            query.set("action", action)
-            query.set("site", site)
-            // In HTTP, "Referer" is a standardized misspelling of the English word "referrer".
-            // See: https://en.wikipedia.org/wiki/HTTP_referer
-            query.set("referer", referrer)
-            const body = new URLSearchParams()
-            body.set("t", new Date().toJSON())
-            navigator.sendBeacon(
-              `https://us-central1-wonderful-software.cloudfunctions.net/webring-notify?${query}`,
-              body
-            )
-          }
-        } catch (e) {
-          console.error("Unable to send beacon", e)
-        }
-      }
       const processInboundLink = () => {
         const hash = location.hash
         if (hash.startsWith("#") && !hash.startsWith("#/")) {
@@ -291,7 +170,7 @@ const components = {
           const matchedLink = links.find((l) => l.id === id)
           if (matchedLink) {
             sendBeacon("inbound", matchedLink.id)
-            needsInboundTransition = true
+            transitionInfo.needsInboundTransition = true
             inboundReferrer = matchedLink.id
             return true
           }
@@ -310,7 +189,6 @@ const components = {
       const go = (link) => {
         sendBeacon("outbound", link.id, inboundReferrer)
       }
-
       const previous = () => {
         let index = currentLink.value ? currentLink.value.index : 0
         index = (index + links.length - 1) % links.length
@@ -328,7 +206,6 @@ const components = {
         links[index].select()
         sendGtagEvent("next", "button")
       }
-
       const showList = () => {
         hidingListOnMobile.value = true
         location.hash = "#list"
@@ -745,3 +622,140 @@ for (const [key, value] of Object.entries(components)) {
 }
 
 const instance = app.mount("#app")
+
+function processLinksInDOM({ onLinkSelected }) {
+  return Array.from(document.querySelectorAll("#ring > li")).map(
+    (li, index) => {
+      const id = li.id
+      const a = li.querySelector("a")
+      const url = a.href
+      const text = a.innerText
+      const select = () => {
+        onLinkSelected(link)
+        location.hash = "#/" + id
+      }
+      const data = Vue.computed(() => siteData[id])
+      const link = Vue.reactive({
+        id,
+        text,
+        url,
+        a,
+        li,
+        select,
+        siteData: data,
+        index,
+      })
+      a.addEventListener("click", (e) => {
+        e.preventDefault()
+        select()
+      })
+      return link
+    }
+  )
+}
+
+/**
+ * @param {import("vue").Ref<any>} currentLink
+ * @param {{ needsInboundTransition: boolean; }} transitionInfo
+ */
+function useViewingLinks(currentLink, transitionInfo) {
+  const viewingLinks = Vue.reactive({})
+  Vue.watch(
+    () => currentLink.value,
+    (link, previous) => {
+      let exitTransform = "scale(0.5)"
+      if (link) {
+        let enterTransform = "scale(0.5)"
+        if (transitionInfo.needsInboundTransition) {
+          enterTransform = "scale(1.5)"
+          transitionInfo.needsInboundTransition = false
+        }
+        if (previous) {
+          enterTransform = `translateX(${
+            link.index > previous.index ? 100 : -100
+          }%)`
+          exitTransform = `translateX(${
+            link.index > previous.index ? -100 : 100
+          }%)`
+        }
+        const view = Vue.reactive({
+          link,
+          style: {
+            opacity: 0,
+            transform: enterTransform,
+          },
+        })
+        viewingLinks[link.id] = view
+        Vue.nextTick(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              view.style.opacity = 1
+              view.style.transform = ""
+            })
+          })
+        })
+      }
+      for (const key of Object.keys(viewingLinks)) {
+        if (key !== link.id) {
+          const view = viewingLinks[key]
+          if (view && !view.transitioningOut) {
+            view.transitioningOut = true
+            view.style.opacity = 0
+            view.style.transform = exitTransform
+            view.style.pointerEvents = "none"
+            setTimeout(() => {
+              if (viewingLinks[key] === view) {
+                delete viewingLinks[key]
+              }
+            }, 1000)
+          }
+        }
+      }
+    },
+    { immediate: true }
+  )
+  return viewingLinks
+}
+
+/**
+ * Sends non-essential tracking event, e.g. button clicks, to Google Analytics,
+ * for collecting usage statistics with no personalization.
+ */
+const sendGtagEvent = (action, category, label, value) => {
+  try {
+    if (!window.gtag) return
+    gtag("event", action, {
+      event_category: category,
+      event_label: label,
+      value: value,
+    })
+  } catch (e) {
+    console.error("Unable to send gtag", e)
+  }
+}
+
+/**
+ * Sends important beacons about how the webring is functioning.
+ * Data is completely anonymous.
+ */
+const sendBeacon = (action, site, referrer = "") => {
+  try {
+    if (navigator.sendBeacon) {
+      const query = new URLSearchParams()
+      query.set("hostname", location.hostname)
+      query.set("action", action)
+      query.set("site", site)
+      // In HTTP, "Referer" is a standardized misspelling of the English word "referrer".
+      // See: https://en.wikipedia.org/wiki/HTTP_referer
+      query.set("referer", referrer)
+      const body = new URLSearchParams()
+      body.set("t", new Date().toJSON())
+      navigator.sendBeacon(
+        `https://us-central1-wonderful-software.cloudfunctions.net/webring-notify?${query}`,
+        body
+      )
+    }
+  } catch (e) {
+    console.error("Unable to send beacon", e)
+  }
+}
