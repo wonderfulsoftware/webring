@@ -4,6 +4,7 @@ const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
 
+/** @type {{ [componentName: string]: import('vue').Component}} */
 const components = {
   app: {
     style: css`
@@ -56,7 +57,6 @@ const components = {
         max-width: 360px;
         margin: 0 auto;
       }
-
       .site-info__toolbar {
         position: fixed;
         bottom: 24px;
@@ -105,82 +105,6 @@ const components = {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
       }
-
-      .info-link {
-        display: block;
-        overflow: hidden;
-        padding-top: 170.67%;
-        position: relative;
-        border-radius: 3px;
-        background: #e9e8e7;
-      }
-      .info-link::after {
-        display: block;
-        position: absolute;
-        content: "";
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        box-shadow: inset 0 1px 8px #0002;
-        z-index: 90;
-      }
-      .info-link img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 50;
-      }
-      .info-link__visit {
-        position: absolute;
-        top: 0;
-        right: 0;
-        height: 256px;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 70;
-      }
-      .info-link:hover .info-link__visit {
-        opacity: 1;
-      }
-      .info-link::before {
-        display: block;
-        position: absolute;
-        content: "";
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: #888583;
-        z-index: 60;
-        opacity: 0.1;
-        transition: 0.1s opacity;
-      }
-      .info-link:hover::before {
-        opacity: 0.2;
-      }
-      .info-link__text {
-        background: #605850cc;
-        color: #fff;
-        padding: 8px 16px;
-        border-radius: 100px;
-      }
-
-      /* https://github.com/dtinth/blurhash-image */
-      blurhash-image {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #888 no-repeat center;
-        background-size: 100% 100%;
-      }
     `,
     template: html`
       <div
@@ -211,19 +135,7 @@ const components = {
                 {{ link.siteData && link.siteData.description }}
               </p>
               <p>
-                <a :href="link.url" class="info-link" @click="go(link)">
-                  <blurhash-image
-                    v-if="link.siteData && link.siteData.blurhash"
-                    :blurhash="link.siteData.blurhash"
-                  ></blurhash-image>
-                  <image-that-doesnt-display-at-first-but-fades-in-once-loaded
-                    v-if="link.siteData"
-                    :src="link.siteData.mobileImageUrlV2"
-                  />
-                  <span class="info-link__visit">
-                    <span class="info-link__text">เข้าชมเว็บไซต์</span>
-                  </span>
-                </a>
+                <info-link :link="link" :go="go" />
               </p>
             </div>
           </div>
@@ -479,6 +391,102 @@ const components = {
         autoRandom,
       }
     },
+  },
+  "info-link": {
+    props: {
+      link: { type: Object },
+      go: { type: Function },
+    },
+    template: html` <a :href="link.url" class="info-link" @click="go(link)">
+      <blurhash-image
+        v-if="link.siteData && link.siteData.blurhash"
+        :blurhash="link.siteData.blurhash"
+      ></blurhash-image>
+      <image-that-doesnt-display-at-first-but-fades-in-once-loaded
+        v-if="link.siteData"
+        :src="link.siteData.mobileImageUrlV2"
+      />
+      <span class="info-link__visit">
+        <span class="info-link__text">เข้าชมเว็บไซต์</span>
+      </span>
+    </a>`,
+    style: css`
+      .info-link {
+        display: block;
+        overflow: hidden;
+        padding-top: 170.67%;
+        position: relative;
+        border-radius: 3px;
+        background: #e9e8e7;
+      }
+      .info-link::after {
+        display: block;
+        position: absolute;
+        content: "";
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        box-shadow: inset 0 1px 8px #0002;
+        z-index: 90;
+      }
+      .info-link img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 50;
+      }
+      .info-link__visit {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 256px;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 70;
+      }
+      .info-link:hover .info-link__visit {
+        opacity: 1;
+      }
+      .info-link::before {
+        display: block;
+        position: absolute;
+        content: "";
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: #888583;
+        z-index: 60;
+        opacity: 0.1;
+        transition: 0.1s opacity;
+      }
+      .info-link:hover::before {
+        opacity: 0.2;
+      }
+      .info-link__text {
+        background: #605850cc;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 100px;
+      }
+
+      /* https://github.com/dtinth/blurhash-image */
+      blurhash-image {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #888 no-repeat center;
+        background-size: 100% 100%;
+      }
+    `,
   },
   "image-that-doesnt-display-at-first-but-fades-in-once-loaded": {
     template: html`<img
