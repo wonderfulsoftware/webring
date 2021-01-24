@@ -1,8 +1,8 @@
-name: Update stats
+name: Update site data
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 17 * * *'
+    - cron: "0 17 * * *"
   push:
     branches:
       - main

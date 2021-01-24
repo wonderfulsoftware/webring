@@ -1,0 +1,29 @@
+name: Publish stats
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 17 * * *"
+  push:
+    branches:
+      - main
+jobs:
+  update:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: "wonderfulsoftware/webring-usage-stats"
+          ssh-key: ${{ secrets.WEBRING_USAGE_STATS_DEPLOY_KEY }}
+          path: tmp/webring-usage-stats
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - run: yarn
+      - run: curl -u "${{ secrets.AMPLITUDE_USER }}" 'https://amplitude.com/api/3/chart/9bk8bge/query' > tmp/amplitude.json
+      - run: node automation/usage-publisher
+      - run: cd tmp/webring-usage-stats && git add -A && (git commit -m "Update site data" || true) && git push
+        env:
+          GIT_COMMITTER_NAME: dtinth-bot
+          GIT_AUTHOR_NAME: dtinth-bot
+          EMAIL: dtinth-bot@users.noreply.github.com
