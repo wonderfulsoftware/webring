@@ -49,3 +49,7 @@ for (const [i, key] of Object.keys(data).sort().entries()) {
 
 output.push(output.length ? "}" : "{}")
 fs.writeFileSync("tmp/webring-usage-stats/traffic.json", output.join("\n"))
+fs.writeFileSync(
+  "tmp/webring-usage-stats-commit-message",
+  "Update usage statistics as of " + new Date().toJSON()
+)
