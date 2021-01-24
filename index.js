@@ -8,51 +8,6 @@ const css = String.raw
 const components = {
   app: {
     style: css`
-      #aux {
-        position: fixed;
-        top: 64px;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: white;
-        padding: 0 20px 20px;
-        opacity: 1;
-        transition: 0.5s opacity, 0.5s transform;
-      }
-      .--hide-on-mobile#aux {
-        opacity: 0;
-        pointer-events: none;
-      }
-      #aux::after {
-        position: absolute;
-        display: block;
-        content: "";
-        z-index: 90;
-        height: 128px;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        pointer-events: none;
-        background: linear-gradient(to bottom, #fff0, #fffd, #fff);
-      }
-      @media (min-width: 960px) {
-        #aux {
-          top: 20px;
-          width: 375px;
-          left: auto;
-          padding: 14px 20px 12px;
-          border-left: 1px solid #f5f4f3;
-        }
-        #aux::after {
-          height: 128px;
-          background: linear-gradient(to bottom, #fff0, #fff);
-        }
-        .--hide-on-mobile#aux {
-          opacity: 1;
-          pointer-events: unset;
-        }
-      }
-
       #site-info {
         max-width: 360px;
         margin: 0 auto;
@@ -107,11 +62,7 @@ const components = {
       }
     `,
     template: html`
-      <div
-        id="aux"
-        v-if="currentLink"
-        :class="{'--hide-on-mobile': hidingListOnMobile}"
-      >
+      <aux v-if="currentLink" :hidingListOnMobile="hidingListOnMobile">
         <div id="site-info">
           <div class="site-info__toolbar">
             <webring-toolbar
@@ -140,7 +91,7 @@ const components = {
             </div>
           </div>
         </div>
-      </div>
+      </aux>
       <for-first-timer />
     `,
     setup() {
@@ -268,6 +219,63 @@ const components = {
         autoRandom,
       }
     },
+  },
+  aux: {
+    props: {
+      hidingListOnMobile: { type: Boolean },
+    },
+    style: css`
+      #aux {
+        position: fixed;
+        top: 64px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: white;
+        padding: 0 20px 20px;
+        opacity: 1;
+        transition: 0.5s opacity, 0.5s transform;
+      }
+      .--hide-on-mobile#aux {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #aux::after {
+        position: absolute;
+        display: block;
+        content: "";
+        z-index: 90;
+        height: 128px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        pointer-events: none;
+        background: linear-gradient(to bottom, #fff0, #fffd, #fff);
+      }
+      @media (min-width: 960px) {
+        #aux {
+          top: 20px;
+          width: 375px;
+          left: auto;
+          padding: 14px 20px 12px;
+          border-left: 1px solid #f5f4f3;
+        }
+        #aux::after {
+          height: 128px;
+          background: linear-gradient(to bottom, #fff0, #fff);
+        }
+        .--hide-on-mobile#aux {
+          opacity: 1;
+          pointer-events: unset;
+        }
+      }
+    `,
+    template: html`<div
+      id="aux"
+      :class="{'--hide-on-mobile': hidingListOnMobile}"
+    >
+      <slot />
+    </div>`,
   },
   "info-link": {
     props: {
