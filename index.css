@@ -50,7 +50,7 @@ h1 a {
 }
 
 main {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
 }
 @media (min-width: 960px) {
@@ -106,6 +106,12 @@ main {
 @media (min-width: 960px) {
   #ring {
     column-count: 2;
+  }
+}
+
+@media (min-width: 1200px) {
+  #ring {
+    column-count: 3;
   }
 }
 
