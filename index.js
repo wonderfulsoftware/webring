@@ -28,25 +28,6 @@ const components = {
         }
       }
 
-      .site-info-item {
-        position: absolute;
-        top: 0px;
-        right: 20px;
-        left: 20px;
-        text-align: center;
-        transition: 0.3s transform, 0.3s opacity;
-      }
-      .site-info-item__body {
-        max-width: 360px;
-        margin: 0 auto;
-      }
-      @media (min-width: 960px) {
-        .site-info-item {
-          top: 80px;
-          text-align: left;
-        }
-      }
-
       h2 {
         margin: 0.8rem 0 0;
       }
@@ -74,8 +55,7 @@ const components = {
               :autoRandom="autoRandom"
             />
           </div>
-          <div
-            class="site-info-item"
+          <site-info-item
             v-for="({link, style}, id) of viewingLinks"
             :key="id"
             :style="style"
@@ -89,14 +69,13 @@ const components = {
                 <info-link :link="link" :go="go" />
               </p>
             </div>
-          </div>
+          </site-info-item>
         </div>
       </aux>
       <for-first-timer />
     `,
     setup() {
       const currentLink = Vue.ref()
-      const autoPrevious = Vue.ref(false)
       const autoNext = Vue.ref(false)
       const autoRandom = Vue.ref(false)
       const transitionInfo = {
@@ -109,6 +88,7 @@ const components = {
         currentLink.value = link
         hidingListOnMobile.value = false
         sendGtagEvent("view", "link", link.id)
+        location.hash = "#/" + link.id
       }
       const links = processLinksInDOM({ onLinkSelected })
 
@@ -277,6 +257,33 @@ const components = {
     >
       <slot />
     </div>`,
+  },
+  "site-info-item": {
+    template: html`<div class="site-info-item">
+      <div class="site-info-item__body">
+        <slot />
+      </div>
+    </div>`,
+    style: css`
+      .site-info-item {
+        position: absolute;
+        top: 0px;
+        right: 20px;
+        left: 20px;
+        text-align: center;
+        transition: 0.3s transform, 0.3s opacity;
+      }
+      .site-info-item__body {
+        max-width: 360px;
+        margin: 0 auto;
+      }
+      @media (min-width: 960px) {
+        .site-info-item {
+          top: 80px;
+          text-align: left;
+        }
+      }
+    `,
   },
   "info-link": {
     props: {
@@ -641,7 +648,6 @@ function processLinksInDOM({ onLinkSelected }) {
       const text = a.innerText
       const select = () => {
         onLinkSelected(link)
-        location.hash = "#/" + id
       }
       const data = Vue.computed(() => siteData[id])
       const link = Vue.reactive({
