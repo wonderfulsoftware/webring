@@ -38,9 +38,6 @@ const siteFetcherInstanceBase = encrypted(`
       if (data.url !== site.url) {
         data.url = site.url
       }
-      if (data.number !== site.number) {
-        data.number = site.number
-      }
       if (
         !data.lastUpdated ||
         data.lastUpdated < new Date(Date.now() - 3600e3 * 20).toJSON()
@@ -70,6 +67,9 @@ const siteFetcherInstanceBase = encrypted(`
         data.backlink = fetchResult.backlink
         data.lastUpdated = new Date().toJSON()
         console.log(data)
+      }
+      if (data.number !== site.number) {
+        data.number = site.number
       }
     } catch (e) {
       console.error(site.id, e)
