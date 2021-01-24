@@ -4,7 +4,7 @@ const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
 
-/** @type {{ [componentName: string]: import('vue').Component}} */
+/** @type {{ [componentName: string]: import('vue').Component & {style?: string}}} */
 const components = {
   app: {
     style: css`
@@ -96,6 +96,7 @@ const components = {
     `,
     setup() {
       const currentLink = Vue.ref()
+      const autoPrevious = Vue.ref(false)
       const autoNext = Vue.ref(false)
       const autoRandom = Vue.ref(false)
       const transitionInfo = {
