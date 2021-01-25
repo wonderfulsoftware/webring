@@ -29,12 +29,12 @@ jobs:
         env:
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
-      - run: cd tmp/webring-site-screenshots && git add -A && (git commit -m "$(cat tmp/webring-site-screenshots-commit-message)" || true) && git push
+      - run: cd tmp/webring-site-screenshots && git add -A && (git commit -m "$(cat ../webring-site-screenshots-commit-message)" || true) && git push
         env:
           GIT_COMMITTER_NAME: GitHub Actions
           GIT_AUTHOR_NAME: GitHub Actions
           EMAIL: github-actions[bot]@users.noreply.github.com
-      - run: cd tmp/webring-site-data && git add -A && (git commit -m "$(cat tmp/webring-site-data-commit-message)" || true) && git push
+      - run: cd tmp/webring-site-data && git add -A && (git commit -m "$(cat ../webring-site-data-commit-message)" || true) && git push
         env:
           GIT_COMMITTER_NAME: dtinth-bot
           GIT_AUTHOR_NAME: dtinth-bot
