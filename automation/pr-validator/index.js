@@ -21,8 +21,8 @@ const captureEndpointUrl = encrypted(`
 
 ;(async () => {
   const url = process.argv[2]
-  const fetchResult = await fetchSiteInfo(url)
   console.log("Loading site info...")
+  const fetchResult = await fetchSiteInfo(url)
   const ephemeralScreenshotUrl = generateEphemeralUrl(url)
   console.log("Persisting screenshot...")
   const persistentScreenshotUrl = await persistScreenshot(
