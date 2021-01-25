@@ -1,0 +1,32 @@
+version: "3.2"
+services:
+  cypress:
+    build: ./automation/e2e
+    environment:
+      - DISPLAY=novnc:0.0
+    depends_on:
+      - novnc
+    entrypoint:
+      - bash
+      - -c
+      - npx wait-on http://novnc:8080 && cypress open --project /e2e
+    working_dir: /e2e
+    volumes:
+      - ./automation/e2e:/e2e
+      - ./automation/site-fetcher/.fonts.conf:/root/.fonts.conf:ro
+  novnc:
+    image: theasp/novnc:latest
+    environment:
+      - DISPLAY_WIDTH=1280
+      - DISPLAY_HEIGHT=720
+      - RUN_XTERM=no
+    ports:
+      - "6080:8080"
+    volumes:
+      - ./automation/e2e/novnc.html:/usr/share/novnc/index.html:ro
+  webring:
+    image: caddy:latest
+    volumes:
+      - ./:/usr/share/caddy:ro
+    ports:
+      - "6081:80"
