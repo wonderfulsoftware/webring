@@ -3,27 +3,25 @@ services:
   cypress:
     build: ./automation/e2e
     environment:
-      - DISPLAY=novnc:0.0
+      - DISPLAY=novnc:1.0
     depends_on:
       - novnc
     entrypoint:
       - bash
       - -c
-      - npx wait-on http://novnc:8080 && cypress open --project /e2e
+      - npx wait-on http://novnc && cypress open --project /e2e
     working_dir: /e2e
     volumes:
       - ./automation/e2e:/e2e
       - ./automation/site-fetcher/.fonts.conf:/root/.fonts.conf:ro
   novnc:
-    image: theasp/novnc:latest
+    image: dorowu/ubuntu-desktop-lxde-vnc
     environment:
-      - DISPLAY_WIDTH=1280
-      - DISPLAY_HEIGHT=720
-      - RUN_XTERM=no
+      - RESOLUTION=1280x720
     ports:
-      - "6080:8080"
+      - "6080:80"
     volumes:
-      - ./automation/e2e/novnc.html:/usr/share/novnc/index.html:ro
+      - ./automation/e2e/xvfb.sh:/usr/local/bin/xvfb.sh
   webring:
     image: caddy:latest
     volumes:
