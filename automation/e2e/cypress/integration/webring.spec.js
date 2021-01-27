@@ -26,17 +26,36 @@ context("webring", () => {
 
   // viewport: mobile, desktop
   describe("entering from another website", () => {
-    it("should automatically advance to next page", () => {
-      cy.visitRoute("#monosor.dev").shouldAutomaticallySelectPage("monosor.com")
-      // cy.visitRoute("#monosor.dev:prev").shouldAutomaticallySelectPage(
-      //   "notaboutcode.com"
-      // )
-      // cy.visitRoute("#monosor.dev:random").shouldAutomaticallySelectPage(
-      //   "notaboutcode.com"
-      // )
-      // cy.visitRoute("#monosor.dev:list").shouldAutomaticallySelectPage(
-      //   "notaboutcode.com"
-      // )
+    describe("without suffix", () => {
+      it("should automatically advance to next page", () => {
+        cy.visitRoute("#monosor.dev")
+        cy.shouldAutomaticallySelectPage("monosor.com")
+      })
+    })
+    describe("with :next suffix", () => {
+      it("should automatically advance to next page", () => {
+        cy.visitRoute("#monosor.dev:next")
+        cy.shouldAutomaticallySelectPage("monosor.com")
+      })
+    })
+    xdescribe("with :prev suffix", () => {
+      it("should automatically advance to next page", () => {
+        cy.visitRoute("#monosor.dev:prev")
+        cy.shouldAutomaticallySelectPage("notaboutcode.com")
+      })
+    })
+    xdescribe("with :random suffix", () => {
+      it("should select a random page", () => {
+        cy.visitRoute("#monosor.dev:random")
+        cy.shouldAutomaticallySelectPage("monosor.com")
+      })
+    })
+    describe("with :list suffix", () => {
+      xit("should show the list on mobile")
+      xit("should show the website on desktop", () => {
+        cy.visitRoute("#monosor.dev:list")
+        cy.shouldAutomaticallySelectPage("monosor.com")
+      })
     })
   })
 })
