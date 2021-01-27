@@ -4,6 +4,7 @@ services:
     build: ./automation/e2e
     environment:
       - DISPLAY=novnc:1.0
+      - CYPRESS_BASE_URL=http://webring
     depends_on:
       - novnc
     entrypoint:

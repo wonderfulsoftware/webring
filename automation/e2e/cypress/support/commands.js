@@ -10,10 +10,8 @@
 //
 //
 // -- This is a parent command --
-Cypress.Commands.add("visitRoute", (url) => {
-  // Force a new page load (not only hashchange)
-  cy.visit("http://webring/logo.html")
-  cy.visit("http://webring/" + url)
+Cypress.Commands.add("visitRoute", (hash) => {
+  cy.visit("/?test=" + Date.now() + hash)
 })
 
 Cypress.Commands.add("shouldAutomaticallySelectPage", (siteName) => {

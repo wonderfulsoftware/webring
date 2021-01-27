@@ -2,7 +2,7 @@
 
 context("webring", () => {
   beforeEach(() => {
-    cy.visit("http://webring/#/wonderful.software")
+    cy.visitRoute("#/wonderful.software")
   })
 
   it("shows website info", () => {
@@ -18,7 +18,7 @@ context("webring", () => {
 
   describe("the previous button", () => {
     it("works", () => {
-      cy.visit("http://webring/#/notaboutcode.com")
+      cy.visit("/#/notaboutcode.com")
       cy.get("#previous-button").click()
       cy.get("h2").should("contain.text", "dt.in.th")
     })
