@@ -10,7 +10,16 @@
 //
 //
 // -- This is a parent command --
-// Cypress.Commands.add("login", (email, password) => { ... })
+Cypress.Commands.add("visitRoute", (url) => {
+  // Force a new page load (not only hashchange)
+  cy.visit("http://webring/logo.html")
+  cy.visit("http://webring/" + url)
+})
+
+Cypress.Commands.add("shouldAutomaticallySelectPage", (siteName) => {
+  cy.get("h2").should("contain.text", siteName)
+})
+
 //
 //
 // -- This is a child command --
