@@ -21,6 +21,9 @@ jobs:
       #      https://www.npmjs.com/package/wait-on
       - run: npx serve & npx wait-on http://localhost:5000
 
+      # Install Cypress
+      - run: cd automation/e2e && yarn
+
       # See: https://github.com/cypress-io/github-action
       - name: Cypress Run
         uses: cypress-io/github-action@v2
