@@ -33,6 +33,7 @@ jobs:
           # See: https://github.com/cypress-io/github-action#parallel
           parallel: true
           project: ./automation/e2e
+          install: false
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
