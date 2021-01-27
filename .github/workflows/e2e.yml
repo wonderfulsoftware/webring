@@ -22,17 +22,18 @@ jobs:
       - run: npx serve & npx wait-on http://localhost:5000
 
       # Install Cypress
-      - run: cd automation/e2e && yarn
+      - run: yarn
+        working-directory: ./automation/e2e
 
       # See: https://github.com/cypress-io/github-action
       - name: Cypress Run
         uses: cypress-io/github-action@v2
+        working-directory: ./automation/e2e
         with:
           browser: chrome
           record: true
           # See: https://github.com/cypress-io/github-action#parallel
           parallel: true
-          project: ./automation/e2e
           install: false
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
