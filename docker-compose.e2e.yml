@@ -1,0 +1,39 @@
+version: "3.2"
+services:
+  cypress:
+    build: ./automation/e2e
+    # See: https://on.cypress.io/renderer-process-crashed
+    # See: https://github.com/cypress-io/cypress/issues/350
+    ipc: host
+    environment:
+      # See: https://github.com/bahmutov/cypress-open-from-docker-compose
+      - DISPLAY=novnc:1.0
+      - CYPRESS_BASE_URL=http://webring
+    depends_on:
+      - novnc
+    entrypoint: []
+    command: bash -c 'wait-on http://novnc && cypress open --project /project/automation/e2e'
+    working_dir: /project/automation/e2e
+    volumes:
+      # This allows Cypress to access .git and infer the current commit when pushing result to Cypress Dashboard.
+      - ./:/project:ro
+      # This allows Cypress to write to the `automation/e2e` folder.
+      - ./automation/e2e:/project/automation/e2e
+      # This sets up fonts so that it renders Thai text the same way as `automation/site-fetcher`.
+      - ./automation/site-fetcher/.fonts.conf:/root/.fonts.conf:ro
+
+  novnc:
+    image: dorowu/ubuntu-desktop-lxde-vnc
+    environment:
+      - RESOLUTION=1280x720
+    ports:
+      - "6080:80"
+    volumes:
+      - ./automation/e2e/xvfb.sh:/usr/local/bin/xvfb.sh
+
+  webring:
+    image: caddy:latest
+    volumes:
+      - ./:/usr/share/caddy:ro
+    ports:
+      - "6081:80"

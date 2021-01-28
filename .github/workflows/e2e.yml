@@ -1,0 +1,19 @@
+name: E2E
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Run web server
+      - run: docker-compose -f docker-compose.e2e.yml up -d webring
+
+      # Run Cypress
+      - run: docker-compose -f docker-compose.e2e.yml run cypress bash -c 'cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}'

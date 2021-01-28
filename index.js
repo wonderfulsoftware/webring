@@ -3,6 +3,13 @@
 const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
+const TEST_MODE = new URLSearchParams(location.search).has("test")
+  ? {
+      sentBeacons: [],
+    }
+  : null
+
+Object.assign(window, { WEBRING_TEST_MODE: TEST_MODE })
 
 /** @type {{ [componentName: string]: import('vue').Component & {style?: string}}} */
 const components = {
@@ -118,8 +125,11 @@ const components = {
           hidingListOnMobile.value = true
         }
       }
-      const go = (link) => {
+      const go = (link, event) => {
         sendBeacon("outbound", link.id, inboundReferrer)
+        if (TEST_MODE) {
+          event.preventDefault()
+        }
       }
       const previous = () => {
         let index = currentLink.value ? currentLink.value.index : 0
@@ -128,7 +138,8 @@ const components = {
         sendGtagEvent("previous", "button")
       }
       const random = () => {
-        links[~~(Math.random() * links.length)].select()
+        const generatedNumber = TEST_MODE ? 3 : ~~(Math.random() * links.length)
+        links[generatedNumber % links.length].select()
         sendGtagEvent("random", "button")
       }
       const next = () => {
@@ -290,7 +301,12 @@ const components = {
       link: { type: Object },
       go: { type: Function },
     },
-    template: html` <a :href="link.url" class="info-link" @click="go(link)">
+    template: html` <a
+      :href="link.url"
+      class="info-link"
+      :data-cy="'go:' + link.id"
+      @click="go(link, $event)"
+    >
       <blurhash-image
         v-if="link.siteData && link.siteData.blurhash"
         :blurhash="link.siteData.blurhash"
@@ -512,6 +528,7 @@ const components = {
         <webring-toolbar-button
           @click="$emit('previous')"
           icon="M12.586 27.414l-10-10c-0.781-0.781-0.781-2.047 0-2.828l10-10c0.781-0.781 2.047-0.781 2.828 0s0.781 2.047 0 2.828l-6.586 6.586h19.172c1.105 0 2 0.895 2 2s-0.895 2-2 2h-19.172l6.586 6.586c0.39 0.39 0.586 0.902 0.586 1.414s-0.195 1.024-0.586 1.414c-0.781 0.781-2.047 0.781-2.828 0z"
+          id="previous-button"
         >
           Previous
         </webring-toolbar-button>
@@ -520,6 +537,7 @@ const components = {
           @click="$emit('list')"
           class="webring-toolbar__mobile-only-action"
           icon="M12 2h20v4h-20v-4zM12 14h20v4h-20v-4zM12 26h20v4h-20v-4zM0 4c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4zM0 16c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4zM0 28c0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.209-1.791 4-4 4s-4-1.791-4-4z"
+          id="list-button"
         >
           List
         </webring-toolbar-button>
@@ -528,6 +546,7 @@ const components = {
           @click="$emit('random')"
           icon="M24 22h-3.172l-5-5 5-5h3.172v5l7-7-7-7v5h-4c-0.53 0-1.039 0.211-1.414 0.586l-5.586 5.586-5.586-5.586c-0.375-0.375-0.884-0.586-1.414-0.586h-6v4h5.172l5 5-5 5h-5.172v4h6c0.53 0 1.039-0.211 1.414-0.586l5.586-5.586 5.586 5.586c0.375 0.375 0.884 0.586 1.414 0.586h4v5l7-7-7-7v5z"
           :flash="autoRandom"
+          id="random-button"
         >
           Random
         </webring-toolbar-button>
@@ -536,6 +555,7 @@ const components = {
           @click="$emit('next')"
           icon="M19.414 27.414l10-10c0.781-0.781 0.781-2.047 0-2.828l-10-10c-0.781-0.781-2.047-0.781-2.828 0s-0.781 2.047 0 2.828l6.586 6.586h-19.172c-1.105 0-2 0.895-2 2s0.895 2 2 2h19.172l-6.586 6.586c-0.39 0.39-0.586 0.902-0.586 1.414s0.195 1.024 0.586 1.414c0.781 0.781 2.047 0.781 2.828 0z"
           :flash="autoNext"
+          id="next-button"
         >
           Next
         </webring-toolbar-button>
@@ -604,6 +624,9 @@ const components = {
     `,
 
     props: {
+      id: {
+        type: String,
+      },
       icon: {
         type: String,
       },
@@ -613,6 +636,7 @@ const components = {
     },
     template: html`<button
       class="webring-toolbar-button"
+      :id="id"
       :data-flash="flash ? 1 : 0"
     >
       <svg viewBox="0 0 32 32">
@@ -737,6 +761,9 @@ function useViewingLinks(currentLink, transitionInfo) {
  * for collecting usage statistics with no personalization.
  */
 function sendGtagEvent(action, category, label, value) {
+  if (TEST_MODE) {
+    return
+  }
   try {
     if (!window.gtag) return
     gtag("event", action, {
@@ -754,6 +781,9 @@ function sendGtagEvent(action, category, label, value) {
  * Data is completely anonymous.
  */
 function sendBeacon(action, site, referrer = "") {
+  if (TEST_MODE) {
+    return TEST_MODE.sentBeacons.push({ action, site, referrer })
+  }
   try {
     if (navigator.sendBeacon) {
       const query = new URLSearchParams()
