@@ -16,4 +16,4 @@ jobs:
       - run: docker-compose -f docker-compose.e2e.yml up -d webring
 
       # Run Cypress
-      - run: docker-compose -f docker-compose.e2e.yml run -v /dev/shm:/dev/shm cypress bash -c 'cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}'
+      - run: docker-compose -f docker-compose.e2e.yml run cypress bash -c 'cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}'

@@ -2,6 +2,9 @@ version: "3.2"
 services:
   cypress:
     build: ./automation/e2e
+    # See: https://on.cypress.io/renderer-process-crashed
+    # See: https://github.com/cypress-io/cypress/issues/350
+    ipc: host
     environment:
       # See: https://github.com/bahmutov/cypress-open-from-docker-compose
       - DISPLAY=novnc:1.0
