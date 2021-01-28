@@ -11,3 +11,7 @@ docker-compose -f docker-compose.e2e.yml up
 ```
 
 Then, open <http://localhost:6080> to control Cypress Test Runner.
+
+## Development
+
+Run `yarn` inside `automation/e2e` first so that type definitions are properly fetched.
