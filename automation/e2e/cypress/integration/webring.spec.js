@@ -39,13 +39,37 @@ function commonTests() {
       cy.visitRoute("#")
       cy.shouldBeOnSite("monosor.dev")
     })
+    it("should send beacon when visiting that site", () => {
+      cy.get('[data-cy="go:monosor.dev"]').click()
+      cy.shouldSendBeacon({
+        action: "outbound",
+        site: "monosor.dev",
+        referrer: "",
+      })
+    })
   })
 
   describe("inbound links", () => {
     context("visiting #<site>", () => {
-      it("should automatically advance to next page", () => {
+      beforeEach(() => {
         cy.visitRoute("#monosor.dev")
+      })
+      it("should automatically advance to next page", () => {
         cy.shouldBeOnSite("monosor.com")
+      })
+      it("should send beacon upon entering", () => {
+        cy.shouldSendBeacon({
+          action: "inbound",
+          site: "monosor.dev",
+        })
+      })
+      it("should send beacon when visiting next site", () => {
+        cy.get('[data-cy="go:monosor.com"]').click()
+        cy.shouldSendBeacon({
+          action: "outbound",
+          site: "monosor.com",
+          referrer: "monosor.dev",
+        })
       })
     })
     describe("visiting #<site>:next", () => {

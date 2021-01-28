@@ -3,5 +3,6 @@ declare namespace Cypress {
   interface Chainable {
     visitRoute(value: string): Chainable
     shouldBeOnSite(value: string): Chainable
+    shouldSendBeacon(info: any): Chainable
   }
 }

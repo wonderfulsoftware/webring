@@ -4,6 +4,12 @@ const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
 const TEST_MODE = new URLSearchParams(location.search).has("test")
+  ? {
+      sentBeacons: [],
+    }
+  : null
+
+Object.assign(window, { WEBRING_TEST_MODE: TEST_MODE })
 
 /** @type {{ [componentName: string]: import('vue').Component & {style?: string}}} */
 const components = {
@@ -119,8 +125,11 @@ const components = {
           hidingListOnMobile.value = true
         }
       }
-      const go = (link) => {
+      const go = (link, event) => {
         sendBeacon("outbound", link.id, inboundReferrer)
+        if (TEST_MODE) {
+          event.preventDefault()
+        }
       }
       const previous = () => {
         let index = currentLink.value ? currentLink.value.index : 0
@@ -292,7 +301,12 @@ const components = {
       link: { type: Object },
       go: { type: Function },
     },
-    template: html` <a :href="link.url" class="info-link" @click="go(link)">
+    template: html` <a
+      :href="link.url"
+      class="info-link"
+      :data-cy="'go:' + link.id"
+      @click="go(link, $event)"
+    >
       <blurhash-image
         v-if="link.siteData && link.siteData.blurhash"
         :blurhash="link.siteData.blurhash"
@@ -747,6 +761,9 @@ function useViewingLinks(currentLink, transitionInfo) {
  * for collecting usage statistics with no personalization.
  */
 function sendGtagEvent(action, category, label, value) {
+  if (TEST_MODE) {
+    return
+  }
   try {
     if (!window.gtag) return
     gtag("event", action, {
@@ -764,6 +781,9 @@ function sendGtagEvent(action, category, label, value) {
  * Data is completely anonymous.
  */
 function sendBeacon(action, site, referrer = "") {
+  if (TEST_MODE) {
+    return TEST_MODE.sentBeacons.push({ action, site, referrer })
+  }
   try {
     if (navigator.sendBeacon) {
       const query = new URLSearchParams()
