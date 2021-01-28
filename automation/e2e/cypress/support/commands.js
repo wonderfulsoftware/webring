@@ -3,6 +3,6 @@ Cypress.Commands.add("visitRoute", (hash) => {
   cy.visit("/?test=" + Date.now() + hash)
 })
 
-Cypress.Commands.add("shouldAutomaticallySelectPage", (siteName) => {
+Cypress.Commands.add("shouldBeOnSite", (siteName) => {
   cy.get("h2").should("contain.text", siteName)
 })

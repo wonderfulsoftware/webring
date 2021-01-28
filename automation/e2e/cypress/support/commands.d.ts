@@ -2,6 +2,6 @@
 declare namespace Cypress {
   interface Chainable {
     visitRoute(value: string): Chainable
-    shouldAutomaticallySelectPage(value: string): Chainable
+    shouldBeOnSite(value: string): Chainable
   }
 }

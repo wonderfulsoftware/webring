@@ -3,6 +3,7 @@
 const siteData = Vue.reactive({})
 const html = String.raw
 const css = String.raw
+const TEST_MODE = new URLSearchParams(location.search).has("test")
 
 /** @type {{ [componentName: string]: import('vue').Component & {style?: string}}} */
 const components = {
@@ -128,7 +129,8 @@ const components = {
         sendGtagEvent("previous", "button")
       }
       const random = () => {
-        links[~~(Math.random() * links.length)].select()
+        const generatedNumber = TEST_MODE ? 3 : ~~(Math.random() * links.length)
+        links[generatedNumber % links.length].select()
         sendGtagEvent("random", "button")
       }
       const next = () => {
