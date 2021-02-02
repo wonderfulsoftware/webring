@@ -2,10 +2,9 @@
 
 function commonTests() {
   context("e2e with real user behaviour on random link", () => {
-    let baseURL = "https://webring.wonderful.software/"
 
     it("should navigate to the next link for n-link or last-link", () => {
-      cy.visit(baseURL)
+      cy.visit("/")
       cy.get("li[data-current='1']").then((getCurrentLink) => {
         let isLastChild = Cypress.$(getCurrentLink).is(":last-child")
         cy.get("#next-button").click()
@@ -32,7 +31,7 @@ function commonTests() {
     })
 
     it("should navigate to the previous link for n-link or first-link", () => {
-      cy.visit(baseURL)
+      cy.visit("/")
       cy.get("li[data-current='1']").then((getCurrentLink) => {
         let isFirstChild = Cypress.$(getCurrentLink).is(":first-child")
         cy.get("#previous-button").click()
@@ -59,26 +58,15 @@ function commonTests() {
     })
 
     it("should display the sticky consent banner", () => {
-      cy.visit(baseURL)
+      cy.visit("/")
       cy.get("#for-first-timer").should("be.visible")
     })
 
     it("should hide the sticky consent banner when it is clicked", () => {
-      cy.visit(baseURL)
+      cy.visit("/")
       cy.get("#for-first-timer").should("be.visible")
       cy.get("#for-first-timer").click()
       cy.get("#for-first-timer").should("not.be.visible")
-    })
-
-    it("should contain link on site info section", () => {
-      cy.visit(baseURL)
-      cy.get(".site-info-item__body a")
-        .invoke("attr", "href")
-        .then((link) => {
-          cy.request(link).then((res) => {
-            expect(res.status).to.be.eq(200)
-          })
-        })
     })
   })
 }
@@ -95,32 +83,4 @@ context("Desktop", () => {
     cy.viewport(1024, 768)
   })
   commonTests()
-})
-
-context("data.json", () => {
-  it("should return 200", () => {
-    cy.request(
-      "https://wonderfulsoftware.github.io/webring-site-data/data.json"
-    ).then((res) => {
-      expect(res.status).to.be.eq(200)
-    })
-  })
-
-  it("should have keys", () => {
-    cy.request(
-      "https://wonderfulsoftware.github.io/webring-site-data/data.json"
-    ).then((res) => {
-      cy.log(res.body["dt.in.th"])
-      expect(res.body["dt.in.th"]).to.have.keys(
-        "blurhash",
-        "backlink",
-        "description",
-        "lastUpdated",
-        "mobileImageUrlV2",
-        "number",
-        "url"
-      )
-      expect(res.body["dt.in.th"]["backlink"]).to.have.keys("href", "rect")
-    })
-  })
 })
