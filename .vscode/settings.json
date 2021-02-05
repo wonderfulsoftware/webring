@@ -1,7 +1,7 @@
 {
   "editor.tabSize": 2,
   "extensions.ignoreRecommendations": true,
-  "files.autoSave": "off",
+  "files.autoSave": "afterDelay",
   "typescript.tsc.autoDetect": "off",
   "npm.autoDetect": "off",
   "debug.allowBreakpointsEverywhere": true,
