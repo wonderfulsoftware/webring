@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 14.x
       - run: yarn
-      - run: node automation/pr-validator
+      - run: node automation/pr-validator ${{ github.event.inputs.url }} ${{ github.event.inputs.pr }}
         env:
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
