@@ -1,4 +1,4 @@
-name: Update site data
+name: Review PR
 on:
   workflow_dispatch:
     inputs:
