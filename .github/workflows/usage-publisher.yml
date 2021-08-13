@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 14.x
       - run: yarn
-      - run: curl -u "${{ secrets.AMPLITUDE_USER }}" 'https://amplitude.com/api/3/chart/9bk8bge/query' > tmp/amplitude.json
+      - run: node automation/usage-publisher/download-data-from-amplitude
       - run: node automation/usage-publisher
       - run: cd tmp/webring-usage-stats && git add -A && (git commit -m "$(cat ../webring-usage-stats-commit-message)" || true) && git push
         env:
