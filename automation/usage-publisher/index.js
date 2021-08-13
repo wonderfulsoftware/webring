@@ -2,11 +2,13 @@ const fs = require("fs")
 const stats = JSON.parse(fs.readFileSync("tmp/amplitude.json", "utf8")).data
 const data = {}
 const output = []
+const { getSites } = require("../common/getSites")
+const sites = getSites()
 
 for (const [targetIndex, targetDate] of stats.xValues.entries()) {
   if (targetDate < "2021-01-24") continue
   const stat = {}
-  const summary = { total: 0, ring: 0, external: 0 }
+  const summary = { total: 0, ring: 0, external: 0, next: 0 }
   for (const [i, meta] of stats.seriesMeta.entries()) {
     const [to, from] = meta.eventGroupBys
     const count = stats.series[i][targetIndex].value
@@ -15,6 +17,13 @@ for (const [targetIndex, targetDate] of stats.xValues.entries()) {
         stat[from] = {}
       }
       stat[from][to] = count
+
+      const fromIndex = sites.findIndex((site) => site.id === from)
+      const toIndex = sites.findIndex((site) => site.id === to)
+      const nextIndex = (fromIndex + 1) % sites.length
+      if (toIndex === nextIndex) {
+        summary.next += count
+      }
     }
     summary.total += count
     summary[from === "(none)" ? "external" : "ring"] += count
