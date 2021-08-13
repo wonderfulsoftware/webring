@@ -3,8 +3,8 @@ require("dotenv").config()
 const encrypted = require("@dtinth/encrypted")()
 const axios = require("axios").default
 const fs = require("fs")
-const cheerio = require("cheerio")
 const jimp = require("jimp")
+const { getSites } = require("../common/getSites")
 
 const siteFetcherInstanceBase = encrypted(`
   hPICn0kIZz95DnrFYyUrih8KGX560QbX.cTRujVSHIJAs7EklBTU65we8I2z46k/YV8KUvis
@@ -15,17 +15,7 @@ const siteFetcherInstanceBase = encrypted(`
   const db = JSON.parse(
     fs.readFileSync("tmp/webring-site-data/data.json", "utf8")
   )
-  const $ = cheerio.load(fs.readFileSync("index.html", "utf8"))
-  /** @type {{id: string, url: string, number: number}[]}*/
-  const sites = []
-  let nextNumber = 0
-  for (const site of Array.from($("#ring li[id]"))) {
-    sites.push({
-      id: $(site).attr("id"),
-      url: $(site).find("a").attr("href"),
-      number: nextNumber++,
-    })
-  }
+  const sites = getSites()
 
   Object.values(db).forEach((data) => {
     delete data.number
