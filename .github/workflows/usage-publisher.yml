@@ -21,6 +21,8 @@ jobs:
           node-version: 14.x
       - run: yarn
       - run: node automation/usage-publisher/download-data-from-amplitude
+        env:
+          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
       - run: node automation/usage-publisher
       - run: cd tmp/webring-usage-stats && git add -A && (git commit -m "$(cat ../webring-usage-stats-commit-message)" || true) && git push
         env:
