@@ -10,6 +10,18 @@ const TEST_MODE = new URLSearchParams(location.search).has("test")
     }
   : null
 
+const enteredApp = Vue.ref(false)
+const enteredAppPromise = new Promise(resolve => {
+  Vue.watch(
+    () => enteredApp.value,
+    (entered) => {
+      if (entered) {
+        resolve()
+      }
+    }
+  )  
+})
+
 Object.assign(window, { WEBRING_TEST_MODE: TEST_MODE })
 
 /** @type {{ [componentName: string]: import('vue').Component & {style?: string}}} */
@@ -80,7 +92,8 @@ const components = {
           </site-info-item>
         </div>
       </aux>
-      <for-first-timer />
+      <for-first-timer v-if="onboardingUx == 'v1'" />
+      <for-first-timer-v2 v-if="onboardingUx == 'v2'" />
       <teleport to="#feed">
         <feed />
       </teleport>
@@ -167,9 +180,13 @@ const components = {
         }
         if (inbound) {
           setTimeout(() => {
-            next()
-            autoNext.value = true
-          }, 500)
+            enteredAppPromise.then(() => {
+              setTimeout(() => {
+                next()
+                autoNext.value = true
+              }, 200)
+            })
+          }, 300)
         }
         window.addEventListener("hashchange", () => {
           updateCurrentLink()
@@ -224,6 +241,7 @@ const components = {
         go,
         autoNext,
         autoRandom,
+        onboardingUx: 'v2', // TEST_MODE ? 'v2' : 'v1'
       }
     },
   },
@@ -496,6 +514,7 @@ const components = {
             hide.value = false
           }, 1000)
         }
+        enteredApp.value = true
       })
       const acknowledge = () => {
         localStorage.WEBRING_ACKNOWLEDGED = "1"
@@ -503,6 +522,96 @@ const components = {
         if (button.value) {
           button.value.blur()
         }
+      }
+      return { hide, acknowledge, button }
+    },
+  },
+  "for-first-timer-v2": {
+    style: css`
+      @keyframes for-first-timer-v2__fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes for-first-timer-v2__popIn {
+        from { transform: scale(0.01); }
+        to { transform: scale(1); }
+      }
+      #for-first-timer-v2 {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 210;
+        background: #f5f4f3cc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: 0.36s for-first-timer-v2__fadeIn;
+      }
+      .for-first-timer-v2__content {
+        background: #fff;
+        padding: 1em;
+        width: 64vw;
+        max-width: 32em;
+        border-radius: 0.5em;
+        box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
+        animation: 0.36s for-first-timer-v2__popIn;
+      }
+      .for-first-timer-v2__button {
+        background: #da3567;
+        color: #fff;
+        font: inherit;
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        border: 0;
+        border-radius: 0.25em;
+        margin-top: 0.5em;
+        padding: 0.25em;
+        cursor: pointer;
+      }
+    `,
+    template: html`<div
+      id="for-first-timer-v2"
+      v-if="!hide"
+    >
+      <div class="for-first-timer-v2__content">
+        <strong>ยินดีต้อนรับสู่ “วงแหวนเว็บ”</strong>
+        เว็บนี้สร้างขึ้นเพื่อส่งเสริมให้ศิลปิน นักออกแบบ และนักพัฒนา
+        สร้างเว็บไซต์ของตัวเองและแบ่งปันการเข้าชมซึ่งกันและกัน
+        เว็บที่เข้าร่วมวงจะใช้สัญลักษณ์
+        <span class="webring-symbol">
+          <img src="webring.svg" />
+        </span>
+        เพื่อเชื่อมเว็บเข้าด้วยกันเป็นวงกลม
+        <button
+          @click="acknowledge"
+          class="for-first-timer-v2__button"
+        >เข้าสู่วงแหวนเว็บ</span>
+      </div>
+    </div>`,
+    setup() {
+      const hide = Vue.ref(true)
+      const button = Vue.ref()
+      Vue.onMounted(() => {
+        console.log(localStorage.WEBRING_ACKNOWLEDGED)
+        if (!localStorage.WEBRING_ACKNOWLEDGED) {
+          setTimeout(() => {
+            hide.value = false
+          }, 1)
+        } else {
+          enteredApp.value = true
+        }
+      })
+      const acknowledge = () => {
+        localStorage.WEBRING_ACKNOWLEDGED = "1"
+        hide.value = true
+        if (button.value) {
+          button.value.blur()
+        }
+        enteredApp.value = true
       }
       return { hide, acknowledge, button }
     },
