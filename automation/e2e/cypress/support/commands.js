@@ -1,6 +1,6 @@
 // See: https://on.cypress.io/custom-commands
 Cypress.Commands.add("visitRoute", (hash) => {
-  cy.visit("/?test=" + Date.now() + hash)
+  cy.visit("/?test=" + Date.now() + "&test_onboarded=1" + hash)
 })
 
 Cypress.Commands.add("shouldBeOnSite", (siteName) => {

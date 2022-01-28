@@ -4,6 +4,8 @@ const siteData = Vue.reactive({})
 const feedData = Vue.ref([])
 const html = String.raw
 const css = String.raw
+const forceOnboarded =
+  new URLSearchParams(location.search).get("test_onboarded") === "1"
 const TEST_MODE = new URLSearchParams(location.search).has("test")
   ? {
       sentBeacons: [],
@@ -11,7 +13,7 @@ const TEST_MODE = new URLSearchParams(location.search).has("test")
   : null
 
 const enteredApp = Vue.ref(false)
-const enteredAppPromise = new Promise(resolve => {
+const enteredAppPromise = new Promise((resolve) => {
   Vue.watch(
     () => enteredApp.value,
     (entered) => {
@@ -19,7 +21,7 @@ const enteredAppPromise = new Promise(resolve => {
         resolve()
       }
     }
-  )  
+  )
 })
 
 Object.assign(window, { WEBRING_TEST_MODE: TEST_MODE })
@@ -241,7 +243,7 @@ const components = {
         go,
         autoNext,
         autoRandom,
-        onboardingUx: 'v2', // TEST_MODE ? 'v2' : 'v1'
+        onboardingUx: "v2", // TEST_MODE ? 'v2' : 'v1'
       }
     },
   },
@@ -529,12 +531,20 @@ const components = {
   "for-first-timer-v2": {
     style: css`
       @keyframes for-first-timer-v2__fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
       @keyframes for-first-timer-v2__popIn {
-        from { transform: scale(0.01); }
-        to { transform: scale(1); }
+        from {
+          transform: scale(0.01);
+        }
+        to {
+          transform: scale(1);
+        }
       }
       #for-first-timer-v2 {
         position: fixed;
@@ -597,7 +607,7 @@ const components = {
       const button = Vue.ref()
       Vue.onMounted(() => {
         console.log(localStorage.WEBRING_ACKNOWLEDGED)
-        if (!localStorage.WEBRING_ACKNOWLEDGED) {
+        if (!localStorage.WEBRING_ACKNOWLEDGED && !forceOnboarded) {
           setTimeout(() => {
             hide.value = false
           }, 1)
@@ -771,7 +781,7 @@ const components = {
       </span>
     </button>`,
   },
-  "feed": {
+  feed: {
     style: css`
       .webring-feed {
         padding: 1em 0 0 0;
@@ -817,33 +827,47 @@ const components = {
     `,
     setup() {
       const feedList = Vue.computed(() => {
-        const commonLength = (/** @type {string} */ a, /** @type {string} */ b) => {
-          if (a === b) return a.length;
+        const commonLength = (
+          /** @type {string} */ a,
+          /** @type {string} */ b
+        ) => {
+          if (a === b) return a.length
           if (a.slice(0, 8) === b.slice(0, 8)) return 8
           if (a.slice(0, 5) === b.slice(0, 5)) return 5
           return 0
         }
-        let lastDate = ''
-        return feedData.value.flatMap(d => {
-          const date = new Date(Date.parse(d.published) + 7 * 3600e3).toISOString().slice(0, 10);
+        let lastDate = ""
+        return feedData.value.flatMap((d) => {
+          const date = new Date(Date.parse(d.published) + 7 * 3600e3)
+            .toISOString()
+            .slice(0, 10)
           if (Date.now() - Date.parse(d.published) > 366 * 86400e3) return []
           const dateCommon = commonLength(lastDate, date)
           lastDate = date
-          return [{ ...d, date: [date.slice(0, dateCommon), date.slice(dateCommon)], dateCommon }]
+          return [
+            {
+              ...d,
+              date: [date.slice(0, dateCommon), date.slice(dateCommon)],
+              dateCommon,
+            },
+          ]
         })
       })
       return { feedList }
     },
-    props: { },
+    props: {},
     template: html`<ul class="webring-feed" v-if="feedList.length > 0">
       <li v-for="feed of feedList">
-        <span class="webring-feed__date"><span class="webring-feed__date-common-part">{{feed.date[0]}}</span>{{feed.date[1]}}{{' '}}</span>
+        <span class="webring-feed__date"
+          ><span class="webring-feed__date-common-part">{{feed.date[0]}}</span
+          >{{feed.date[1]}}{{' '}}</span
+        >
         <a class="webring-feed__site" :href="'#/' + feed.site">{{feed.site}}</a>
         {{' '}}
         <a class="webring-feed__link" :href="feed.url">{{feed.title}}</a>
       </li>
     </ul>`,
-  }
+  },
 }
 
 const app = Vue.createApp(components.app)
