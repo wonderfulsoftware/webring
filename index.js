@@ -1,6 +1,7 @@
 /// <reference path="typedefs.d.ts" />
 
 const siteData = Vue.reactive({})
+const feedData = Vue.ref([])
 const html = String.raw
 const css = String.raw
 const TEST_MODE = new URLSearchParams(location.search).has("test")
@@ -80,6 +81,9 @@ const components = {
         </div>
       </aux>
       <for-first-timer />
+      <teleport to="#feed">
+        <feed />
+      </teleport>
     `,
     setup() {
       const currentLink = Vue.ref()
@@ -184,6 +188,17 @@ const components = {
         }
         const data = await response.json()
         Object.assign(siteData, data)
+      })
+
+      Vue.onMounted(async () => {
+        const response = await fetch(
+          "https://wonderfulsoftware.github.io/webring-site-data/feed.json"
+        )
+        if (!response.ok) {
+          throw new Error("Unable to fetch feed data")
+        }
+        const data = await response.json()
+        feedData.value = data
       })
 
       Vue.watch(
@@ -647,6 +662,79 @@ const components = {
       </span>
     </button>`,
   },
+  "feed": {
+    style: css`
+      .webring-feed {
+        padding: 1em 0 0 0;
+        font-size: 0.9rem;
+        color: #888583;
+        list-style: none;
+        border-top: 1px solid #f5f4f3;
+      }
+      .webring-feed > li {
+        margin: 0.25rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .webring-feed__date {
+        display: inline-block;
+        width: 6em;
+      }
+      .webring-feed__date {
+        font-variant-numeric: tabular-nums;
+      }
+      .webring-feed__date-common-part {
+        color: #fff;
+      }
+      .webring-feed__link {
+        display: block;
+        margin-left: 6.5em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .webring-feed__site {
+        color: #888583;
+        display: inline-block;
+        width: 9.5em;
+        margin-left: 0.5em;
+      }
+      @media (min-width: 1024px) {
+        .webring-feed__link {
+          display: inline;
+          margin-left: 0;
+        }
+      }
+    `,
+    setup() {
+      const feedList = Vue.computed(() => {
+        const commonLength = (/** @type {string} */ a, /** @type {string} */ b) => {
+          if (a === b) return a.length;
+          if (a.slice(0, 8) === b.slice(0, 8)) return 8
+          if (a.slice(0, 5) === b.slice(0, 5)) return 5
+          return 0
+        }
+        let lastDate = ''
+        return feedData.value.flatMap(d => {
+          const date = new Date(Date.parse(d.published) + 7 * 3600e3).toISOString().slice(0, 10);
+          if (Date.now() - Date.parse(d.published) > 366 * 86400e3) return []
+          const dateCommon = commonLength(lastDate, date)
+          lastDate = date
+          return [{ ...d, date: [date.slice(0, dateCommon), date.slice(dateCommon)], dateCommon }]
+        })
+      })
+      return { feedList }
+    },
+    props: { },
+    template: html`<ul class="webring-feed" v-if="feedList.length > 0">
+      <li v-for="feed of feedList">
+        <span class="webring-feed__date"><span class="webring-feed__date-common-part">{{feed.date[0]}}</span>{{feed.date[1]}}{{' '}}</span>
+        <a class="webring-feed__site" :href="'#/' + feed.site">{{feed.site}}</a>
+        {{' '}}
+        <a class="webring-feed__link" :href="feed.url">{{feed.title}}</a>
+      </li>
+    </ul>`,
+  }
 }
 
 const app = Vue.createApp(components.app)
