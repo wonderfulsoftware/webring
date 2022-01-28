@@ -2,9 +2,8 @@
 
 function commonTests() {
   context("e2e with real user behaviour on random link", () => {
-
     it("should navigate to the next link for n-link or last-link", () => {
-      cy.visit("/")
+      cy.visit("/?test_onboarded=1")
       cy.get("li[data-current='1']").then((getCurrentLink) => {
         let isLastChild = Cypress.$(getCurrentLink).is(":last-child")
         cy.get("#next-button").click()
@@ -31,7 +30,7 @@ function commonTests() {
     })
 
     it("should navigate to the previous link for n-link or first-link", () => {
-      cy.visit("/")
+      cy.visit("/?test_onboarded=1")
       cy.get("li[data-current='1']").then((getCurrentLink) => {
         let isFirstChild = Cypress.$(getCurrentLink).is(":first-child")
         cy.get("#previous-button").click()
@@ -59,14 +58,14 @@ function commonTests() {
 
     it("should display the sticky consent banner", () => {
       cy.visit("/")
-      cy.get("#for-first-timer").should("be.visible")
+      cy.get("#for-first-timer-v2").should("be.visible")
     })
 
     it("should hide the sticky consent banner when it is clicked", () => {
       cy.visit("/")
-      cy.get("#for-first-timer").should("be.visible")
-      cy.get("#for-first-timer").click()
-      cy.get("#for-first-timer").should("not.be.visible")
+      cy.get("#for-first-timer-v2").should("be.visible")
+      cy.contains("เข้าสู่วงแหวนเว็บ").click()
+      cy.get("#for-first-timer-v2").should("not.exist")
     })
   })
 }
