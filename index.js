@@ -12,6 +12,7 @@ const TEST_MODE = new URLSearchParams(location.search).has("test")
     }
   : null
 
+const autoMode = Vue.ref("none") // 'none', 'random', 'next'
 const enteredApp = Vue.ref(false)
 const enteredAppPromise = new Promise((resolve) => {
   Vue.watch(
@@ -177,10 +178,12 @@ const components = {
         const inbound = processInboundLink()
         updateCurrentLink()
         if (!currentLink.value && location.hash !== "#/list") {
+          autoMode.value = "random"
           autoRandom.value = true
           random()
         }
         if (inbound) {
+          autoMode.value = "next"
           setTimeout(() => {
             enteredAppPromise.then(() => {
               setTimeout(() => {
@@ -569,6 +572,9 @@ const components = {
         box-shadow: 0 0.25em 1em rgba(0, 0, 0, 0.2);
         animation: 0.36s for-first-timer-v2__popIn;
       }
+      .for-first-timer-v2__content > :first-child {
+        margin-top: 0;
+      }
       .for-first-timer-v2__button {
         background: #da3567;
         color: #fff;
@@ -582,20 +588,33 @@ const components = {
         padding: 0.25em;
         cursor: pointer;
       }
+      @media (min-width: 960px) {
+        .for-first-timer-v2__mobile-only {
+          display: none;
+        }
+      }
     `,
     template: html`<div
       id="for-first-timer-v2"
       v-if="!hide"
     >
       <div class="for-first-timer-v2__content">
-        <strong>ยินดีต้อนรับสู่ “วงแหวนเว็บ”</strong>
-        เว็บนี้สร้างขึ้นเพื่อส่งเสริมให้ศิลปิน นักออกแบบ และนักพัฒนา
-        สร้างเว็บไซต์ของตัวเองและแบ่งปันการเข้าชมซึ่งกันและกัน
-        เว็บที่เข้าร่วมวงจะใช้สัญลักษณ์
-        <span class="webring-symbol">
-          <img src="webring.svg" />
-        </span>
-        เพื่อเชื่อมเว็บเข้าด้วยกันเป็นวงกลม
+        <p>
+          <strong>ยินดีต้อนรับสู่ “วงแหวนเว็บ”</strong>
+          เว็บนี้สร้างขึ้นเพื่อส่งเสริมให้ศิลปิน นักออกแบบ และนักพัฒนา
+          สร้างเว็บไซต์ของตัวเองและแบ่งปันการเข้าชมซึ่งกันและกัน
+          เว็บที่เข้าร่วมวงจะใช้สัญลักษณ์
+          <span class="webring-symbol">
+            <img src="webring.svg" />
+          </span>
+          เพื่อเชื่อมเว็บเข้าด้วยกันเป็นวงกลม
+        </p>
+        <p v-if="autoMode === 'random'" class="for-first-timer-v2__mobile-only">
+          คุณสามารถดูรายชื่อเว็บทั้งหมดได้โดยคลิกที่ปุ่ม “List”
+        </p>
+        <p v-if="autoMode === 'next'">
+          เราจะนำคุณไปยังเว็บถัดไปในวงแหวนนี้
+        </p>
         <button
           @click="acknowledge"
           class="for-first-timer-v2__button"
@@ -623,7 +642,7 @@ const components = {
         }
         enteredApp.value = true
       }
-      return { hide, acknowledge, button }
+      return { hide, acknowledge, button, autoMode }
     },
   },
   "webring-toolbar": {
