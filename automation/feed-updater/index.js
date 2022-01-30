@@ -87,6 +87,28 @@ const feedReader = require("feed-reader")
     "tmp/webring-site-data/feed.json",
     JSON.stringify(nextFeedDb, null, 2)
   )
+  fs.writeFileSync(
+    "tmp/webring-site-data/feed.opml",
+    [
+      `<?xml version="1.0" encoding="UTF-8"?>`,
+      `<opml version="1.1">`,
+      `  <head>`,
+      `    <title>วงแหวนเว็บ.ไทย</title>`,
+      `  </head>`,
+      `  <body>`,
+      `    <outline title="วงแหวนเว็บ.ไทย" text="วงแหวนเว็บ.ไทย">`,
+      ...sites
+        .filter((s) => s.feed)
+        .flatMap((site) => {
+          return [
+            `      <outline text="${site.id}" title="${site.id}" type="rss" xmlUrl="${site.feed}" htmlUrl="${site.url}"/>`,
+          ]
+        }),
+      `    </outline>`,
+      `  </body>`,
+      `</opml>`,
+    ].join("\n")
+  )
 
   // Add (or update) the commit message
   try {
