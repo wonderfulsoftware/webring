@@ -12,6 +12,8 @@ const TEST_MODE = new URLSearchParams(location.search).has("test")
     }
   : null
 
+let inboundReferrer = ""
+
 const autoMode = Vue.ref("none") // 'none', 'random', 'next'
 const enteredApp = Vue.ref(false)
 const enteredAppPromise = new Promise((resolve) => {
@@ -108,7 +110,6 @@ const components = {
       const transitionInfo = {
         needsInboundTransition: false,
       }
-      let inboundReferrer = ""
       const viewingLinks = useViewingLinks(currentLink, transitionInfo)
       const hidingListOnMobile = Vue.ref(true)
       const onLinkSelected = (link) => {
@@ -147,6 +148,7 @@ const components = {
       }
       const go = (link, event) => {
         sendBeacon("outbound", link.id, inboundReferrer)
+        sendGtagEvent("go", "button", link.id)
         if (TEST_MODE) {
           event.preventDefault()
         }
@@ -872,7 +874,11 @@ const components = {
           ]
         })
       })
-      return { feedList }
+      const track = (feed) => {
+        sendGtagEvent("feed", "button", feed.site)
+        sendBeacon("outbound", feed.site, inboundReferrer)
+      }
+      return { feedList, track }
     },
     props: {},
     template: html`<ul class="webring-feed" v-if="feedList.length > 0">
@@ -883,7 +889,9 @@ const components = {
         >
         <a class="webring-feed__site" :href="'#/' + feed.site">{{feed.site}}</a>
         {{' '}}
-        <a class="webring-feed__link" :href="feed.url">{{feed.title}}</a>
+        <a class="webring-feed__link" :href="feed.url" @click="track(feed)"
+          >{{feed.title}}</a
+        >
       </li>
     </ul>`,
   },
