@@ -48,13 +48,16 @@ const feedReader = require("feed-reader")
           )
         }
         if (entries.length > 0) {
+          const dateOf = (entry) => new Date(entry.published).toISOString()
+          entries.sort((a, b) => dateOf(a).localeCompare(dateOf(b)))
+          entries.reverse()
           const title = entries[0].title.replace(/\s+/g, " ").trim()
           if (title) {
             const item = {
               site: site.id,
               title,
               url: entries[0].link,
-              published: new Date(entries[0].published).toISOString(),
+              published: dateOf(entries[0]),
             }
             newItems.push(item)
             toReplace.add(site.id)
