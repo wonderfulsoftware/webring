@@ -116,6 +116,33 @@ main {
   }
 }
 
+@media (min-width: 1400px) {
+  main {
+    max-width: 960px;
+  }
+  #ring {
+    column-count: 4;
+  }
+}
+
+@media (min-width: 1600px) {
+  main {
+    max-width: 1200px;
+  }
+  #ring {
+    column-count: 5;
+  }
+}
+
+@media (min-width: 1800px) {
+  main {
+    max-width: 1440px;
+  }
+  #ring {
+    column-count: 6;
+  }
+}
+
 /* 
 #ring {
   display: flex;
