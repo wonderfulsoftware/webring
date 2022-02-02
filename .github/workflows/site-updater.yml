@@ -2,7 +2,7 @@ name: Update site data
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 17 * * *"
+    - cron: "1 0 * * *"
   push:
     branches:
       - main
