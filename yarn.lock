@@ -505,12 +505,12 @@ axios@^0.21.1:
   dependencies:
     follow-redirects "^1.10.0"
 
-axios@^0.24.0:
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.24.0.tgz#804e6fa1e4b9c5288501dd9dff56a7a0940d20d6"
-  integrity sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==
+axios@^0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.25.0.tgz#349cfbb31331a9b4453190791760a8d35b093e0a"
+  integrity sha512-cD8FOb0tRH3uuEe6+evtAbgJtfxr7ly3fQjYcMcuPlgkwVS9xboaVIpcDV+cYQe+yGykgwZCs1pzjntcGa6l5g==
   dependencies:
-    follow-redirects "^1.14.4"
+    follow-redirects "^1.14.7"
 
 base64-js@^1.3.1:
   version "1.5.1"
@@ -698,22 +698,22 @@ exif-parser@^0.1.12:
   resolved "https://registry.yarnpkg.com/exif-parser/-/exif-parser-0.1.12.tgz#58a9d2d72c02c1f6f02a0ef4a9166272b7760922"
   integrity sha1-WKnS1ywCwfbwKg70qRZicrd2CSI=
 
-fast-xml-parser@^4.0.0-beta.8:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.0.1.tgz#bea0d20ca1d7ad1a5963d609096e8e83e526a7d9"
-  integrity sha512-EN1yOXDmMqpHrqkwTlCJDvFjepJBoBxjLRDtDxFmqrBILGV3NyFWpmcsofSKCCzc+YxhvNreB5rcKzG+TlyWpg==
+fast-xml-parser@^4.0.1:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/fast-xml-parser/-/fast-xml-parser-4.0.2.tgz#23f5da4393d9f4142e26792c1e675ddbafe7029a"
+  integrity sha512-3GOSbMTZxxrPPQ+aURM7Wia10bi71HBbiG/3mOEEkRSAkRtg4m7UhMSnB2rzOhBeRHyJUWsllOfyNnjTT1b85w==
   dependencies:
     strnum "^1.0.5"
 
-feed-reader@^5.0.0-rc2:
-  version "5.0.0-rc2"
-  resolved "https://registry.yarnpkg.com/feed-reader/-/feed-reader-5.0.0-rc2.tgz#4ce1c6176f9d29512d596d2b9694a1eb6d4669ec"
-  integrity sha512-eZFtS6m41IXwlIbaBLLCq7gT396khUuD6GV4fvxIBOwGoub2SlnZY2VbQdm5V5XsBtEKEHoA/YM0UjIv3QcRfw==
+feed-reader@^5.0.0-rc3:
+  version "5.0.0-rc3"
+  resolved "https://registry.yarnpkg.com/feed-reader/-/feed-reader-5.0.0-rc3.tgz#39d0cd3cfe8a1601994833c87e8cc1b63e845593"
+  integrity sha512-XLEprblSfWt8bfkmVpkZNk5Vqe0P0cwy1NmTSnVJUKiN39lCuj/OK53MsJIc8D5Q4sKdmC8pLao6R0ojPas61Q==
   dependencies:
-    axios "^0.24.0"
+    axios "^0.25.0"
     bellajs "^11.0.0rc3"
     debug "^4.3.3"
-    fast-xml-parser "^4.0.0-beta.8"
+    fast-xml-parser "^4.0.1"
     html-entities "^2.3.2"
 
 file-type@^9.0.0:
@@ -726,7 +726,7 @@ follow-redirects@^1.10.0:
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.1.tgz#5f69b813376cee4fd0474a3aba835df04ab763b7"
   integrity sha512-SSG5xmZh1mkPGyKzjZP8zLjltIfpW32Y5QpdNJyjcfGxK3qo3NDDkZOZSFiGn1A6SclQxY9GzEwAHQ3dmYRWpg==
 
-follow-redirects@^1.14.4:
+follow-redirects@^1.14.7:
   version "1.14.7"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.14.7.tgz#2004c02eb9436eee9a21446a6477debf17e81685"
   integrity sha512-+hbxoLbFMbRKDwohX8GkTataGqO6Jb7jGwpAlwgy2bIz25XtRm7KEzJM76R1WiNT5SwZkX4Y75SwBolkpmE7iQ==
