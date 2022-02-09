@@ -1,0 +1,27 @@
+<svg width="512" height="512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="ring-and-star">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M53 128.8l-16-8.2a192 192 0 1094.7-88.9l7.1 16.6A174 174 0 1153 128.8z" fill="#B71B44"/>
+    <path d="M94.7 92.3L82 126.5 62.6 95.7l-36.4-1.4 23.3-28-9.9-35.1 33.9 13.5 30.3-20.3-2.4 36.4L130 83.3l-35.3 9z" fill="#E296AD"/>
+  </g>
+  <style>
+    #ring-and-star path {
+      transform: translate(48px, 48px);
+    }
+    #ring-and-star {
+      transform-origin: center;
+      animation: friction-rotate 2s linear infinite;
+    }
+    @keyframes friction-rotate {
+      0%   { transform: rotate(0deg); }
+      20%  { transform: rotate(0deg); }
+      23%  { transform: rotate(-10deg); }
+      34%  { transform: rotate(130deg); }
+      45%  { transform: rotate(210deg); }
+      56%  { transform: rotate(270deg); }
+      67%  { transform: rotate(310deg); }
+      78%  { transform: rotate(340deg); }
+      89%  { transform: rotate(355deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</svg>
