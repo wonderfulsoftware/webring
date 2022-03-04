@@ -55,7 +55,7 @@ function commonTests() {
         cy.visitRoute("#monosor.dev")
       })
       it("should automatically advance to next page", () => {
-        cy.shouldBeOnSite("monosor.com")
+        cy.shouldBeOnSite("garden.narze.live")
       })
       it("should send beacon upon entering", () => {
         cy.shouldSendBeacon({
@@ -64,10 +64,10 @@ function commonTests() {
         })
       })
       it("should send beacon when visiting next site", () => {
-        cy.get('[data-cy="go:monosor.com"]').click()
+        cy.get('[data-cy="go:garden.narze.live"]').click()
         cy.shouldSendBeacon({
           action: "outbound",
-          site: "monosor.com",
+          site: "garden.narze.live",
           referrer: "monosor.dev",
         })
       })
@@ -75,7 +75,7 @@ function commonTests() {
     describe("visiting #<site>:next", () => {
       it("should automatically advance to next page", () => {
         cy.visitRoute("#monosor.dev:next")
-        cy.shouldBeOnSite("monosor.com")
+        cy.shouldBeOnSite("garden.narze.live")
       })
     })
     xdescribe("visiting #<site>:prev", () => {
@@ -87,14 +87,14 @@ function commonTests() {
     xdescribe("visiting #<site>:random", () => {
       it("should select a random page", () => {
         cy.visitRoute("#monosor.dev:random")
-        cy.shouldBeOnSite("monosor.com")
+        cy.shouldBeOnSite("garden.narze.live")
       })
     })
     describe("wvisiting #<site>:list", () => {
       xit("should show the list on mobile")
       xit("should show the website on desktop", () => {
         cy.visitRoute("#monosor.dev:list")
-        cy.shouldBeOnSite("monosor.com")
+        cy.shouldBeOnSite("garden.narze.live")
       })
     })
   })
