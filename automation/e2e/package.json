@@ -4,8 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.26.1",
-    "cypress": "^6.3.0"
+    "@playwright/test": "^1.26.1"
   },
   "scripts": {}
 }
