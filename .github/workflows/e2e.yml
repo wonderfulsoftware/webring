@@ -11,9 +11,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      # Run web server
-      - run: docker-compose -f docker-compose.e2e.yml up -d webring
-
-      # Run Cypress
-      - run: docker-compose -f docker-compose.e2e.yml run cypress bash -c 'cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}'
+      - run: docker compose up -d webring
+      - name: Install dependencies
+        run: cd automation/e2e && yarn
+      - name: Install Playwright Browsers
+        run: cd automation/e2e && npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: cd automation/e2e && yarn playwright test
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: playwright-report
+          path: automation/e2e/playwright-report/
+          retention-days: 30

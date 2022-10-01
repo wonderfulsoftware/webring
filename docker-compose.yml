@@ -1,0 +1,8 @@
+version: "3.2"
+services:
+  webring:
+    image: caddy:latest
+    volumes:
+      - ./:/usr/share/caddy:ro
+    ports:
+      - "6081:80"
