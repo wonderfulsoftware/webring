@@ -21,7 +21,7 @@ jobs:
       - name: Unlabel
         if: github.event.pull_request.number
         run: |
-          gh pr edit "$PR" --remove-label review
+          gh --repo "$GITHUB_REPOSITORY" pr edit "$PR" --remove-label review
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get URL
