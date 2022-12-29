@@ -26,6 +26,7 @@ jobs:
         id: get-url
         run: |
           URL=$(gh pr diff 140 | grep '^+' | ruby -e 'puts $stdin.read.scan(/href="([^"]+)"/)')
+          echo "Found URL: $URL"
           echo "url=$URL" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
