@@ -1,12 +1,13 @@
 name: Review PR
+run-name: Review PR ${{ inputs.pr }} - ${{ inputs.url }}
 on:
   workflow_dispatch:
     inputs:
       pr:
-        description: 'PR number'     
+        description: "PR number"
         required: true
       url:
-        description: 'Web URL'     
+        description: "Web URL"
         required: true
 jobs:
   update:
@@ -17,7 +18,7 @@ jobs:
         with:
           node-version: 14.x
       - run: yarn
-      - run: node automation/pr-validator ${{ github.event.inputs.url }} ${{ github.event.inputs.pr }}
+      - run: node automation/pr-validator ${{ inputs.url }} ${{ inputs.pr }}
         env:
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
