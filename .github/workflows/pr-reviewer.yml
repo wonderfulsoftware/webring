@@ -9,6 +9,14 @@ on:
       url:
         description: "Web URL"
         required: true
+  workflow_call:
+    inputs:
+      pr:
+        description: "PR number"
+        required: true
+      url:
+        description: "Web URL"
+        required: true
 jobs:
   update:
     runs-on: ubuntu-20.04
