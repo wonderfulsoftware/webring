@@ -21,7 +21,9 @@ jobs:
       - name: Unlabel
         if: github.event.pull_request.number
         run: |
-          curl -X DELETE "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/labels/review?access_token=${{ secrets.GITHUB_TOKEN }}"
+          gh pr edit "$PR" --remove-label review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get URL
         id: get-url
         run: |
