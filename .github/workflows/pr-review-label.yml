@@ -10,6 +10,10 @@ on:
         required: true
 env:
   PR: ${{ github.event.pull_request.number || inputs.pr }}
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 jobs:
   check:
     if: github.event.label.name == 'review'
