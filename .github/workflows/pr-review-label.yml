@@ -1,0 +1,36 @@
+name: PR review label
+run-name: Review label on PR ${{ github.event.pull_request.number }}
+on:
+  pull_request:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number"
+        required: true
+env:
+  PR: ${{ github.event.pull_request.number || inputs.pr }}
+jobs:
+  check:
+    if: github.event.label.name == 'review'
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.get-url.outputs.url }}
+      pr: ${{ env.PR }}
+    steps:
+      - name: Unlabel
+        if: github.event.pull_request.number
+        run: |
+          curl -X DELETE "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/labels/review?access_token=${{ secrets.GITHUB_TOKEN }}"
+      - name: Get URL
+        id: get-url
+        run: |
+          URL=$(gh pr diff 140 | grep '^+' | ruby -e 'puts $stdin.read.scan(/href="([^"]+)"/)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+  review:
+    uses: ./.github/workflows/pr-reviewer.yml
+    needs:
+      - check
+    with:
+      pr: ${{ needs.check.outputs.pr }}
+      url: ${{ needs.check.outputs.url }}
