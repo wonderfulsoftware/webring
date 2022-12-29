@@ -19,6 +19,13 @@ on:
         description: "Web URL"
         type: string
         required: true
+    secrets:
+      ENCRYPTION_SECRET:
+        required: true
+      SITE_FETCHER_API_KEY:
+        required: true
+      GITHUB_TOKEN:
+        required: true
 permissions:
   contents: read
   issues: write
