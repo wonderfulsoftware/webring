@@ -16,7 +16,7 @@ permissions:
   pull-requests: write
 jobs:
   check:
-    if: github.event.label.name == 'review'
+    if: github.event.label.name == 'review' || inputs.pr
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.get-url.outputs.url }}
