@@ -13,9 +13,11 @@ on:
     inputs:
       pr:
         description: "PR number"
+        type: string
         required: true
       url:
         description: "Web URL"
+        type: string
         required: true
 jobs:
   update:
