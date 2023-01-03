@@ -54,7 +54,23 @@
 
 ## ข้อมูล
 
-สามารถถึงข้อมูลเว็บที่อยู่ในวงในรูปแบบ JSON โดยใช้ URL นี้ <https://wonderfulsoftware.github.io/webring-site-data/data.json>
+สามารถถึงข้อมูลเว็บที่อยู่ในวงในรูปแบบ JSON โดยใช้ URL นี้:
+
+| ข้อมูล | URL |
+| --- | --- |
+| รายชื่อเว็บ | <https://wonderfulsoftware.github.io/webring-site-data/data.json> |
+| บทความล่าสุด | <https://wonderfulsoftware.github.io/webring-site-data/feed.json> |
+
+## โซเชียลเน็ตเวิร์ค
+
+สามารถติดตามบทความใหม่จากสมาชิกในวงแหวนเว็บได้ผ่านทางช่องทางต่อไปนี้:
+
+- [Facebook](https://www.facebook.com/webring.in.th)
+- [Mastodon](https://mastodon.in.th/@webring)
+
+เราใช้[ระบบอัตโนมัติ](https://github.com/wonderfulsoftware/webring-social)ในการโพสต์บทความใหม่ขึ้นโซเชียลเน็ตเวิร์ค
+
+หากคุณใช้โปรแกรม[ฟีดรีดเดอร์](https://th.wikipedia.org/wiki/%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%A3%E0%B8%B5%E0%B8%94%E0%B9%80%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B9%8C) คุณสามารถแอดเว็บในวงแหวนเว็บเข้าไปโดยใช้ไฟล์ [OPML](https://wonderfulsoftware.github.io/webring-site-data/feed.opml)
 
 ## แรงบันดาลใจ
 
