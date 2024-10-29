@@ -18,7 +18,7 @@ jobs:
         run: cd automation/e2e && npx playwright install --with-deps
       - name: Run Playwright tests
         run: cd automation/e2e && yarn playwright test
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
