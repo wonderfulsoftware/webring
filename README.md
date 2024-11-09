@@ -67,10 +67,13 @@
 
 - [Facebook](https://www.facebook.com/webring.in.th)
 - [Mastodon](https://mastodon.in.th/@webring)
+- [Bluesky](https://bsky.app/profile/webring.in.th)
 
 เราใช้[ระบบอัตโนมัติ](https://github.com/wonderfulsoftware/webring-social)ในการโพสต์บทความใหม่ขึ้นโซเชียลเน็ตเวิร์ค
 
 หากคุณใช้โปรแกรม[ฟีดรีดเดอร์](https://th.wikipedia.org/wiki/%E0%B8%9F%E0%B8%B5%E0%B8%94%E0%B8%A3%E0%B8%B5%E0%B8%94%E0%B9%80%E0%B8%94%E0%B8%AD%E0%B8%A3%E0%B9%8C) คุณสามารถแอดเว็บในวงแหวนเว็บเข้าไปโดยใช้ไฟล์ [OPML](https://wonderfulsoftware.github.io/webring-site-data/feed.opml)
+
+หากคุณ[ใช้โดเมนของคุณเองเป็น handle บน Bluesky](https://bsky.social/about/blog/4-28-2023-domain-handle-tutorial) คุณจะถูกติดตามโดย[บัญชี Bluesky ของเรา](https://bsky.app/profile/webring.in.th/follows) และถูกเพิ่มเข้าไปในรายชื่อ[สมาชิกวงแหวนเว็บบน Bluesky](https://bsky.app/profile/webring.in.th/lists/3l7kuilcstu2z) โดยอัตโนมัติ
 
 ## แรงบันดาลใจ
 
