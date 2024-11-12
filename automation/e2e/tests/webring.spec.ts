@@ -51,8 +51,8 @@ test.describe("inbound links", () => {
   });
 
   test("should automatically advance to next page", async ({ page }) => {
-    await page.click('[data-cy="go:garden.narze.live"]');
-    await assertHash(page, "#/garden.narze.live");
+    await page.click('[data-cy="go:notaboutcode.com"]');
+    await assertHash(page, "#/notaboutcode.com");
   });
 
   test("should send beacon upon entering", async ({ page }) => {
