@@ -63,10 +63,10 @@ test.describe("inbound links", () => {
   });
 
   test("should send beacon when visiting next site", async ({ page }) => {
-    await page.click('[data-cy="go:garden.narze.live"]');
+    await page.click('[data-cy="go:notaboutcode.com"]');
     await assertBeacon(page, {
       action: "outbound",
-      site: "garden.narze.live",
+      site: "notaboutcode.com",
       referrer: "dt.in.th",
     });
   });
