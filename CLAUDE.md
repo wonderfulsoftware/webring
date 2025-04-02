@@ -41,29 +41,32 @@ EOF
 )"
 ```
 
-1. **If HTML element is invalid:**
-   ```bash
-   # Comment about invalid HTML element
-   gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+##### 1. If HTML element is invalid
+
+```bash
+# Comment about invalid HTML element
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
 @<USERNAME> Thanks for your interest in joining the webring. I noticed some issues with your HTML element:
 - [specific issue with data-lang/id/data-owner]
 
 Please update your PR to fix these issues according to the guidelines.
 EOF
 )"
-   ```
+```
 
-2. **If site meets all requirements:**
-   ```bash
-   # Approve and merge PR
-   gh pr review <PR_NUMBER> --approve --body "@<USERNAME> Thanks, and welcome to the webring!"
-   gh pr merge <PR_NUMBER>
-   ```
+##### 2. If site meets all requirements
 
-3. **If site is missing content:**
-   ```bash
-   # Comment requesting more content
-   gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+```bash
+# Approve and merge PR
+gh pr review <PR_NUMBER> --approve --body "@<USERNAME> Thanks, and welcome to the webring!"
+gh pr merge <PR_NUMBER>
+```
+
+##### 3. If site is missing content
+
+```bash
+# Comment requesting more content
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
 @<USERNAME> Thanks for your interest in joining the webring! I noticed your website currently appears to mainly link to other platforms without having much original content directly on the site itself.
 
 According to our requirements in the [README](https://github.com/wonderfulsoftware/webring?tab=readme-ov-file#%E0%B8%A3%E0%B9%88%E0%B8%A7%E0%B8%A1%E0%B8%A7%E0%B8%87), websites in the webring should:
@@ -75,12 +78,13 @@ This means we're looking for sites that publish content directly on the website 
 Would you be able to add some original content to your site? Once you've added some content, please let me know so we can take another look. Thanks!
 EOF
 )"
-   ```
+```
 
-4. **If using public domain (not allowed):**
-   ```bash
-   # Comment about domain requirement
-   gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+##### 4. If using public domain (not allowed)
+
+```bash
+# Comment about domain requirement
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
 @<USERNAME> Thanks for your interest in joining the webring. However, for this webring you need your own domain as specified in the rules:
 
 > อยู่บนโดเมนของตัวเอง (ไม่รับเว็บที่ใช้โดเมนสาธารณะ เช่น .github.io, .netlify.app, .firebaseapp.com หรือ .web.app)
@@ -88,25 +92,27 @@ EOF
 Can you use another domain that you own?
 EOF
 )"
-   ```
+```
 
-5. **If webring icon not visible:**
-   ```bash
-   # Comment about icon visibility
-   gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+##### 5. If webring icon not visible
+
+```bash
+# Comment about icon visibility
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
 @<USERNAME> Thanks for your submission. The webring icon is not visible in light/dark mode. Please ensure it's visible in all color schemes.
 EOF
 )"
-   ```
+```
 
-6. **If backlink format is incorrect:**
-   ```bash
-   # Comment with correct format
-   gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
+##### 6. If backlink format is incorrect
+
+```bash
+# Comment with correct format
+gh pr comment <PR_NUMBER> --body "$(cat <<'EOF'
 @<USERNAME> Your backlink format needs adjustment. Please change it to: `https://webring.wonderful.software#yourdomain.com` without https:// in the fragment identifier.
 EOF
 )"
-   ```
+```
 
 ### PR Review Process
 1. **Initial Processing**:
