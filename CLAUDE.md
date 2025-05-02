@@ -10,6 +10,8 @@
 
 ### Initial PR Review Checklist
 1. **Add review label** when starting review: `gh pr edit <PR_NUMBER> --add-label "review"`
+   - IMPORTANT: After adding the label, yield back to the user to wait for checks to complete
+   - Ask the user to notify you when checks are ready to proceed
 2. **Check PR validation results** from the automated comment by github-actions bot
 3. **Validate HTML element structure**:
    - Verify the PR adds a single `<li>` element at the end of the list
@@ -19,6 +21,8 @@
    - Ensure link text matches the `id` attribute
 4. **Verify webring link exists** on the site (backlink check should be ✅ in validation results)
 5. **Check site requirements** against README criteria:
+   - IMPORTANT: Provide the site URL to the user for manual verification
+   - Wait for user confirmation before proceeding to approval
    - Personal, non-profit website (portfolio, blog, digital garden)
    - Has actual content (no "coming soon" pages)
    - Uses own domain (not github.io, netlify.app, etc.)
@@ -59,8 +63,10 @@ EOF
 ```bash
 # Approve and merge PR
 gh pr review <PR_NUMBER> --approve --body "@<USERNAME> Thanks, and welcome to the webring!"
-gh pr merge <PR_NUMBER>
+gh pr merge <PR_NUMBER> --squash
 ```
+
+IMPORTANT: Always use the `--squash` option when merging PRs.
 
 ##### 3. If site is missing content
 
@@ -117,18 +123,26 @@ EOF
 ### PR Review Process
 1. **Initial Processing**:
    - Add the "review" label: `gh pr edit <PR_NUMBER> --add-label "review"`
+   - Yield back to the user waiting for validation checks to complete
+   - Wait for user confirmation to proceed with the review
    - Check if automated validation has run: `gh pr view --comments <PR_NUMBER>`
    - Run batch checks to review PR details: `gh pr view <PR_NUMBER>`, `gh pr checks <PR_NUMBER>`, `gh pr diff <PR_NUMBER>`, etc.
 
 2. **Validation**:
    - Verify HTML element structure according to guidelines
    - If invalid, comment with specific issues to fix
-   - If valid, provide executive summary of the PR (ID, URL, owner) to reviewer
+   - If valid, provide site URL to the user for manual verification
+   - Never proceed to approval without user confirmation
    
 3. **Manual Review**:
-   - Reviewer checks website manually against requirements
-   - Reviewer reports findings for final decision
-   - Take appropriate action based on findings (approve/request changes)
+   - User checks website manually against requirements
+   - User reports findings and provides confirmation
+   - Only after user confirmation, proceed with appropriate action (approve/request changes)
+   
+4. **Approval and Merge**:
+   - If site meets all requirements and user confirms, approve the PR
+   - Use `gh pr review <PR_NUMBER> --approve` with appropriate message
+   - Merge the PR using `gh pr merge <PR_NUMBER> --squash`
 
 ### Notes on PR Workflow
 - PRs are typically self-closed by creators if requirements can't be met
