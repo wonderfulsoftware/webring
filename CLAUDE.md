@@ -10,7 +10,8 @@
 
 ### Initial PR Review Checklist
 1. **Add review label** when starting review: `gh pr edit <PR_NUMBER> --add-label "review"`
-   - IMPORTANT: After adding the label, yield back to the user to wait for checks to complete
+   - IMPORTANT: After adding the label, immediately provide the website URL to the user for manual verification
+   - Then yield back to the user to wait for checks to complete
    - Ask the user to notify you when checks are ready to proceed
 2. **Check PR validation results** from the automated comment by github-actions bot
 3. **Validate HTML element structure**:
@@ -123,6 +124,7 @@ EOF
 ### PR Review Process
 1. **Initial Processing**:
    - Add the "review" label: `gh pr edit <PR_NUMBER> --add-label "review"`
+   - Extract and provide the website URL to the user immediately for manual verification
    - Yield back to the user waiting for validation checks to complete
    - Wait for user confirmation to proceed with the review
    - Check if automated validation has run: `gh pr view --comments <PR_NUMBER>`
