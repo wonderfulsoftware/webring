@@ -63,6 +63,9 @@ const siteFetcherInstanceBase = encrypted(`
       if (data.number !== site.number) {
         data.number = site.number
       }
+      if (data.owner !== site.owner) {
+        data.owner = site.owner
+      }
     } catch (e) {
       console.error(site.id, e)
     }
