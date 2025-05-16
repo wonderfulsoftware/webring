@@ -23,13 +23,33 @@ jobs:
           path: tmp/webring-site-screenshots
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 22.x
+      
+      # Build and run site-fetcher locally
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and cache site-fetcher Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./automation/site-fetcher
+          push: false
+          load: true
+          tags: site-fetcher:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Start site-fetcher container
+        run: docker run -d -p 3000:3000 --name site-fetcher site-fetcher:latest
+      
       - run: yarn
       - run: node automation/site-updater
         env:
-          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          SITE_FETCHER_INSTANCE_BASE: http://localhost:3000
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
       - run: node automation/feed-updater
+      
+      - name: Stop site-fetcher container
+        run: docker stop site-fetcher || true
+      
       - run: cd tmp/webring-site-screenshots && git add -A && (git commit -m "$(cat ../webring-site-screenshots-commit-message)" || true) && git push
         env:
           GIT_COMMITTER_NAME: GitHub Actions

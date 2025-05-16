@@ -1,15 +1,11 @@
 require("make-promises-safe")
 require("dotenv").config()
-const encrypted = require("@dtinth/encrypted")()
 const axios = require("axios").default
 const fs = require("fs")
 const jimp = require("jimp")
 const { getSites } = require("../common/getSites")
 
-const siteFetcherInstanceBase = encrypted(`
-  hPICn0kIZz95DnrFYyUrih8KGX560QbX.cTRujVSHIJAs7EklBTU65we8I2z46k/YV8KUvis
-  D0f9cP54jlpVYWitiX0FKXr2Z67dhFj6RqGZsmqVpC6pfKfFl0UoR2+SDlmU=
-`)
+const siteFetcherInstanceBase = process.env.SITE_FETCHER_INSTANCE_BASE || 'http://localhost:3000'
 
 ;(async () => {
   const db = JSON.parse(
