@@ -1,16 +1,15 @@
-const puppeteer = require("puppeteer")
-const { send } = require("micro")
-const jimp = require("jimp")
-const imagemin = require("imagemin")
-const imageminPngquant = require("imagemin-pngquant")
-const Blurhash = require("blurhash")
+import { encode as blurhashEncode } from "blurhash"
+import consola from "consola"
+import imagemin from "imagemin"
+import imageminPngquant from "imagemin-pngquant"
+import jimp from "jimp"
+import { type RequestHandler, send } from "micro"
+import { type Browser, chromium, type Page } from "playwright"
 
-/** @type {import('puppeteer').Browser} */
-let browser
+let browser: Browser | undefined
 
-/** @type {import('micro').RequestHandler} */
-module.exports = async (req, res) => {
-  const url = new URL(req.url, "https://service")
+const handler: RequestHandler = async (req, res) => {
+  const url = new URL(req.url || "", "https://service")
   const captureUrl = url.searchParams.get("url")
   if (!captureUrl) {
     return send(res, 400, "No url")
@@ -25,21 +24,21 @@ module.exports = async (req, res) => {
   }
 
   if (!browser) {
-    browser = await puppeteer.launch({
-      args: ["--no-sandbox"],
-    })
+    browser = await chromium.launch()
   }
 
-  const page = await browser.newPage()
-  page.setUserAgent("webring.wonderful.software")
+  const context = await browser.newContext({
+    userAgent: "webring.wonderful.software",
+  })
+  const page = await context.newPage()
   try {
-    await page.setViewport({ width: 375, height: 640, deviceScaleFactor: 2 })
-    await page
-      .goto(captureUrl, { waitUntil: "networkidle0", timeout: 10000 })
-      .catch(console.error)
+    await page.setViewportSize({ width: 375, height: 640 })
+    await page.goto(captureUrl, { waitUntil: "networkidle", timeout: 10000 }).catch(e => {
+      consola.warn(`Unable to navigate to ${captureUrl}`, e)
+    })
     const image = await capture(page)
     const description = await page.evaluate(() => {
-      const contentOf = (selector) => {
+      const contentOf = (selector: string) => {
         const element = document.querySelector(selector)
         const value = element && element.getAttribute("content")
         return value ? String(value).slice(0, 300) : null
@@ -68,7 +67,6 @@ module.exports = async (req, res) => {
         : null
     })
     res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
-    console.log(image.blurhash)
     if (url.searchParams.get("as") === "json") {
       res.setHeader("Content-Type", "application/json")
       return send(res, 200, {
@@ -83,15 +81,18 @@ module.exports = async (req, res) => {
     }
   } finally {
     await page.close()
+    await context.close()
   }
 }
 
-/**
- * @param {import('puppeteer').Page} page
- */
-async function capture(page) {
-  const getScreenshot = () =>
-    page.screenshot({ encoding: "binary", type: "png" })
+export default handler
+
+async function capture(
+  page: Page
+): Promise<{ buffer: Buffer; blurhash: string }> {
+  const getScreenshot = async () => {
+    return Buffer.from(await page.screenshot({ type: "png" }))
+  }
 
   let screenshot = await getScreenshot()
   let previousScreenshotImage = await jimp.read(screenshot)
@@ -106,15 +107,15 @@ async function capture(page) {
       break
     }
     previousScreenshotImage = screenshotImage
-    if (Date.now() >= start + 5e3) {
+    if (Date.now() >= start + 5000) {
       console.warn("Give up waiting for animations to finish")
       break
     }
   }
 
   const { data, width, height } = previousScreenshotImage.bitmap
-  const blurhash = Blurhash.encode(
-    /** @type {any} */ (data),
+  const blurhash = blurhashEncode(
+    new Uint8ClampedArray(data),
     width,
     height,
     4,
@@ -124,11 +125,7 @@ async function capture(page) {
   return { buffer: screenshot, blurhash }
 }
 
-/**
- * @param {import('jimp')} a
- * @param {import('jimp')} b
- */
-function areImagesDifferent(a, b) {
+function areImagesDifferent(a: jimp, b: jimp): boolean {
   if (a.bitmap.width !== b.bitmap.width) return true
   if (a.bitmap.height !== b.bitmap.height) return true
   const diff = jimp.diff(a, b)
@@ -136,13 +133,10 @@ function areImagesDifferent(a, b) {
   return diff.percent > threshold
 }
 
-/**
- * @param {Buffer} buffer
- */
-async function optimize(buffer) {
+async function optimize(buffer: Buffer): Promise<Buffer> {
   try {
     buffer = await imagemin.buffer(buffer, {
-      plugins: [imageminPngquant.default({ quality: [0.6, 0.8] })],
+      plugins: [imageminPngquant({ quality: [0.6, 0.8] })],
     })
   } catch (error) {
     console.log("Cannot optimize image", error)
