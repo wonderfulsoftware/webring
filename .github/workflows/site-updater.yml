@@ -24,25 +24,25 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 22.x
-      
+
       # Build and run site-fetcher locally
       - name: Run site-fetcher Docker container
         uses: ./.github/actions/site-fetcher-docker
-      
+
       - run: yarn
       - run: node automation/site-updater
         env:
           SITE_FETCHER_INSTANCE_BASE: http://localhost:3000
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
       - run: node automation/feed-updater
-      
+
       - name: Display site-fetcher logs
         if: always()
         run: docker logs site-fetcher || true
-        
+
       - name: Stop site-fetcher container
         run: docker stop site-fetcher || true
-      
+
       - run: cd tmp/webring-site-screenshots && git add -A && (git commit -m "$(cat ../webring-site-screenshots-commit-message)" || true) && git push
         env:
           GIT_COMMITTER_NAME: GitHub Actions
