@@ -16,7 +16,7 @@ const handler: RequestHandler = async (req, res) => {
   const captureUrl = url.searchParams.get("url")
   if (!captureUrl) {
     consola.warn(`Request rejected: No URL provided`)
-    return send(res, 400, "No url")
+    return send(res, 200, "No url")
   }
   consola.info(`Processing request for URL: ${captureUrl}`)
 
@@ -119,7 +119,11 @@ const handler: RequestHandler = async (req, res) => {
     consola.info(
       `Request for ${captureUrl} completed in ${Date.now() - requestStartTime}ms`,
     )
-    unlinkSync(tracePath)
+    try {
+      unlinkSync(tracePath)
+    } catch (error) {
+      consola.warn(`Error deleting trace file ${tracePath}:`, error)
+    }
   }
 }
 
@@ -130,7 +134,13 @@ async function capture(
 ): Promise<{ buffer: Buffer; blurhash: string }> {
   consola.debug(`Starting screenshot capture process`)
   const getScreenshot = async () => {
-    return Buffer.from(await page.screenshot({ type: "png" }))
+    return Buffer.from(
+      await page.screenshot({
+        type: "png",
+        animations: "disabled",
+        timeout: 5000,
+      }),
+    )
   }
 
   let screenshot = await getScreenshot()
