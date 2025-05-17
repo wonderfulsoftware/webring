@@ -31,9 +31,6 @@ jobs:
 
       - run: yarn
       - run: node automation/site-updater
-        env:
-          SITE_FETCHER_INSTANCE_BASE: http://localhost:3000
-          SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
       - run: node automation/feed-updater
 
       - name: Display site-fetcher logs

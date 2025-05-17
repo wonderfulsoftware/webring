@@ -34,7 +34,6 @@ const siteFetcherInstanceBase =
           .get(siteFetcherInstanceBase, {
             params: {
               url: site.url,
-              key: process.env.SITE_FETCHER_API_KEY,
               as: "json",
             },
           })
