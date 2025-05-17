@@ -30,13 +30,18 @@ const siteFetcherInstanceBase =
         !!process.env.FORCE_UPDATE
       ) {
         const start = Date.now()
-        const siteFetchingResponse = await axios.get(siteFetcherInstanceBase, {
-          params: {
-            url: site.url,
-            key: process.env.SITE_FETCHER_API_KEY,
-            as: "json",
-          },
-        })
+        const siteFetchingResponse = await axios
+          .get(siteFetcherInstanceBase, {
+            params: {
+              url: site.url,
+              key: process.env.SITE_FETCHER_API_KEY,
+              as: "json",
+            },
+          })
+          .catch((error) => {
+            updateStatus = `${error}`
+            throw error
+          })
         const fetchResult = siteFetchingResponse.data
         const imageBasename = `${site.id}_375w@2x.png`
         const imagePath = `tmp/webring-site-screenshots/${imageBasename}`
