@@ -1,6 +1,12 @@
 name: Update site data
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update all sites'
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: "1 0 * * *"
   push:
@@ -31,6 +37,8 @@ jobs:
 
       - run: yarn
       - run: node automation/site-updater
+        env:
+          FORCE_UPDATE: ${{ github.event.inputs.force_update == 'true' && '1' || '' }}
       - run: node automation/feed-updater
 
       - name: Display site-fetcher logs
