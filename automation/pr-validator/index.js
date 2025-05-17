@@ -6,11 +6,8 @@ const { Octokit } = require("@octokit/rest")
 const { default: axios } = require("axios")
 const { escape } = require("lodash")
 
-// See `../site-fetcher`
-const siteFetcherInstanceBase = encrypted(`
-  hPICn0kIZz95DnrFYyUrih8KGX560QbX.cTRujVSHIJAs7EklBTU65we8I2z46k/YV8KUvis
-  D0f9cP54jlpVYWitiX0FKXr2Z67dhFj6RqGZsmqVpC6pfKfFl0UoR2+SDlmU=
-`)
+// Use environment variable with default to localhost
+const siteFetcherInstanceBase = process.env.SITE_FETCHER_INSTANCE_BASE || 'http://localhost:3000'
 
 // This is a private endpoint for me to upload images to Azure Blob.
 const captureEndpointUrl = encrypted(`

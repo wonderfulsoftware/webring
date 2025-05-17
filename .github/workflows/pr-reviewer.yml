@@ -35,10 +35,19 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 22.x
+          
+      # Build and run site-fetcher locally
+      - name: Run site-fetcher Docker container
+        uses: ./.github/actions/site-fetcher-docker
+          
       - run: yarn
       - run: node automation/pr-validator ${{ inputs.url }} ${{ inputs.pr }}
         env:
           ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           SITE_FETCHER_API_KEY: ${{ secrets.SITE_FETCHER_API_KEY }}
           BOT_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Display site-fetcher logs
+        if: always()
+        run: docker logs site-fetcher || true
