@@ -4,6 +4,7 @@ import imagemin from "imagemin"
 import imageminPngquant from "imagemin-pngquant"
 import jimp from "jimp"
 import { type RequestHandler, send } from "micro"
+import { readFileSync, unlinkSync } from "node:fs"
 import { type Browser, chromium, type Page } from "playwright"
 
 let browser: Browser | undefined
@@ -37,21 +38,26 @@ const handler: RequestHandler = async (req, res) => {
   const context = await browser.newContext({
     userAgent: "webring.wonderful.software",
   })
+  const sessionId = crypto.randomUUID()
+  const tracePath = `/tmp/trace-${sessionId}.zip`
+  await context.tracing.start({ screenshots: true, snapshots: true })
   const page = await context.newPage()
   consola.info(`Browser context and page created for ${captureUrl}`)
-  
+
   try {
     await page.setViewportSize({ width: 375, height: 640 })
     consola.info(`Navigating to ${captureUrl}`)
-    await page.goto(captureUrl, { waitUntil: "networkidle", timeout: 10000 }).catch(e => {
-      consola.warn(`Unable to navigate to ${captureUrl}`, e)
-    })
+    await page
+      .goto(captureUrl, { waitUntil: "networkidle", timeout: 10000 })
+      .catch((e) => {
+        consola.warn(`Unable to navigate to ${captureUrl}`, e)
+      })
     consola.info(`Capturing screenshot for ${captureUrl}`)
     const image = await capture(page)
     consola.info(`Getting page metadata for ${captureUrl}`)
     const description = await page.evaluate(() => {
       const contentOf = (selector: string) => {
-        const element = (document).querySelector(selector)
+        const element = document.querySelector(selector)
         const value = element && element.getAttribute("content")
         return value ? String(value).slice(0, 300) : null
       }
@@ -66,7 +72,7 @@ const handler: RequestHandler = async (req, res) => {
     consola.info(`Checking for webring backlink on ${captureUrl}`)
     const backlink = await page.evaluate(() => {
       const element = document.querySelector(
-        'a[href^="https://webring.wonderful.software"]'
+        'a[href^="https://webring.wonderful.software"]',
       )
       const rect = element && element.getBoundingClientRect()
       return element
@@ -79,7 +85,7 @@ const handler: RequestHandler = async (req, res) => {
           }
         : null
     })
-    res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600")
+    await context.tracing.stop({ path: tracePath })
     if (url.searchParams.get("as") === "json") {
       consola.info(`Returning JSON response for ${captureUrl}`)
       res.setHeader("Content-Type", "application/json")
@@ -89,6 +95,16 @@ const handler: RequestHandler = async (req, res) => {
         description,
         backlink,
       })
+    } else if (url.searchParams.get("as") === "trace") {
+      consola.info(`Returning trace response for ${captureUrl}`)
+      const buffer = readFileSync(tracePath)
+      res.setHeader("Content-Type", "application/zip")
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=trace-${sessionId}.zip`,
+      )
+      res.setHeader("Content-Length", buffer.length)
+      return send(res, 200, buffer)
     } else {
       consola.info(`Returning PNG image for ${captureUrl}`)
       res.setHeader("Content-Type", "image/png")
@@ -100,14 +116,17 @@ const handler: RequestHandler = async (req, res) => {
   } finally {
     await page.close()
     await context.close()
-    consola.info(`Request for ${captureUrl} completed in ${Date.now() - requestStartTime}ms`)
+    consola.info(
+      `Request for ${captureUrl} completed in ${Date.now() - requestStartTime}ms`,
+    )
+    unlinkSync(tracePath)
   }
 }
 
 export default handler
 
 async function capture(
-  page: Page
+  page: Page,
 ): Promise<{ buffer: Buffer; blurhash: string }> {
   consola.debug(`Starting screenshot capture process`)
   const getScreenshot = async () => {
@@ -128,12 +147,16 @@ async function capture(
     screenshot = await getScreenshot()
     const screenshotImage = await jimp.read(screenshot)
     if (!areImagesDifferent(previousScreenshotImage, screenshotImage)) {
-      consola.debug(`Screenshot stabilized after ${iterations} iterations (${Date.now() - start}ms)`)
+      consola.debug(
+        `Screenshot stabilized after ${iterations} iterations (${Date.now() - start}ms)`,
+      )
       break
     }
     previousScreenshotImage = screenshotImage
     if (Date.now() >= start + 5000) {
-      consola.warn(`Gave up waiting for animations to finish after ${iterations} iterations (5000ms)`)
+      consola.warn(
+        `Gave up waiting for animations to finish after ${iterations} iterations (5000ms)`,
+      )
       break
     }
   }
@@ -145,7 +168,7 @@ async function capture(
     width,
     height,
     4,
-    7
+    7,
   )
   consola.debug(`Optimizing screenshot image`)
   screenshot = await optimize(screenshot)
@@ -166,12 +189,19 @@ async function optimize(buffer: Buffer): Promise<Buffer> {
   const originalSize = buffer.length
   try {
     consola.debug(`Optimizing image of size ${originalSize} bytes`)
-    buffer = Buffer.from(await imagemin.buffer(buffer, {
-      plugins: [(imageminPngquant as any)({ quality: [0.6, 0.8] })],
-    }))
+    buffer = Buffer.from(
+      await imagemin.buffer(buffer, {
+        plugins: [(imageminPngquant as any)({ quality: [0.6, 0.8] })],
+      }),
+    )
     const newSize = buffer.length
-    const savingsPercent = ((originalSize - newSize) / originalSize * 100).toFixed(1)
-    consola.debug(`Image optimized: ${originalSize} -> ${newSize} bytes (${savingsPercent}% savings)`)
+    const savingsPercent = (
+      ((originalSize - newSize) / originalSize) *
+      100
+    ).toFixed(1)
+    consola.debug(
+      `Image optimized: ${originalSize} -> ${newSize} bytes (${savingsPercent}% savings)`,
+    )
   } catch (error) {
     consola.error("Cannot optimize image", error)
   }

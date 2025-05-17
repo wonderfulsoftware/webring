@@ -23,7 +23,9 @@ This part of the stack is Dockerized so that everyone can run it locally and kno
    http://localhost:3000/?url=https://dt.in.th/
    ```
 
-## How to get JSON data
+## Debugging
+
+### Getting JSON data
 
 For debugging purposes, you can also get the site data in JSON format:
 
@@ -32,7 +34,18 @@ http://localhost:3000/?url=https://dt.in.th/&as=json
 ```
 
 This returns a JSON object containing:
+
 - `blurhash`: The blurhash string for the image
 - `content`: Base64-encoded PNG image
 - `description`: Site description (if available)
 - `backlink`: Information about the webring backlink
+
+### Getting trace file
+
+You can also debug in more details with the help of [Playwright’s tracing](https://playwright.dev/docs/trace-viewer) features:
+
+```
+http://localhost:3000/?url=https://dt.in.th/&as=trace
+```
+
+This will return a zip file containing the trace data. You can open this file in the [Playwright Trace Viewer](https://trace.playwright.dev/) to see what happened during the screenshot capture process.

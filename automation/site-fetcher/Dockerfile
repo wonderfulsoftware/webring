@@ -14,3 +14,4 @@ RUN mkdir -p /home/pwuser/.fonts \
 CMD yarn start
 COPY ./src/ ./src/
 COPY ./.fonts.conf /home/pwuser/
+ENV CONSOLA_LEVEL=4
