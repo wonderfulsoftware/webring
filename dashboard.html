@@ -34,20 +34,29 @@
       <h1 class="h3 pb-2 border-bottom">webring dashboard</h1>
       <div x-data="dashboard">
         <h2 class="h4 pt-3 pb-2 border-bottom">Site list</h2>
+        <div class="mb-3">
+          <button class="btn btn-primary" @click="generateIssue" :disabled="sitesForCleanup.length === 0">
+            Generate Cleanup Issue <span x-show="sitesForCleanup.length > 0" class="badge bg-danger ms-1" x-text="sitesForCleanup.length"></span>
+          </button>
+        </div>
         <table class="table table-sm">
           <thead>
             <tr>
               <th scope="col">Number</th>
               <th scope="col">Site</th>
+              <th scope="col">Owner</th>
               <th scope="col">Notes</th>
             </tr>
           </thead>
           <tbody>
             <template x-for="{site, id} in sites" :key="id">
-              <tr>
+              <tr :class="hasCleanupIssues(site) ? 'table-danger' : ''">
                 <th scope="row" x-text="site.number"></th>
                 <td>
                   <a :href="site.url" target="_blank" x-text="id"></a>
+                </td>
+                <td>
+                  <a x-show="site.owner" :href="'https://github.com/' + site.owner" target="_blank" x-text="site.owner"></a>
                 </td>
                 <td>
                   <span x-text="notes(site)"></span>
@@ -63,6 +72,10 @@
       document.addEventListener("alpine:init", () => {
         Alpine.data("dashboard", () => ({
           sites: [],
+          // Constants for issue detection
+          BACKLINK_MISSING_DAYS_THRESHOLD: 7, // Days without backlink to qualify for cleanup
+          UPDATE_DAYS_WARNING: 3, // Days without update to show warning
+
           async init() {
             const response = await fetch(
               "https://wonderfulsoftware.github.io/webring-site-data/data.json"
@@ -81,19 +94,97 @@
             console.log(sites)
             this.sites = sites
           },
-          notes(site) {
+
+          // Get all issues for a site with structured information
+          getIssues(site) {
             const issues = []
+
+            // Check for backlink
             if (!site.backlink) {
-              issues.push("unable to detect backlink")
+              issues.push({
+                message: "unable to detect backlink",
+                isCleanupCandidate: true
+              })
             }
-            if (
-              Date.parse(site.lastUpdated) <
-              Date.now() - 1000 * 60 * 60 * 24 * 3
-            ) {
-              issues.push("not updated in 3 days")
+
+            // Check for site not updated recently
+            if (site.lastUpdated) {
+              const lastUpdated = Date.parse(site.lastUpdated)
+              const daysSinceUpdate = Math.floor((Date.now() - lastUpdated) / (1000 * 60 * 60 * 24))
+
+              if (daysSinceUpdate >= this.UPDATE_DAYS_WARNING) {
+                issues.push({
+                  message: `not updated in ${daysSinceUpdate} days`,
+                  // Site is a cleanup candidate if missing backlink for 7+ days
+                  isCleanupCandidate: daysSinceUpdate >= this.BACKLINK_MISSING_DAYS_THRESHOLD
+                })
+              }
             }
-            return issues.join(", ")
+
+            return issues
           },
+
+          // Format issues as a string
+          notes(site) {
+            return this.getIssues(site).map(issue => issue.message).join(", ")
+          },
+
+          // Check if a site has cleanup-worthy issues
+          hasCleanupIssues(site) {
+            // A site qualifies for cleanup if it has at least one issue that makes it a cleanup candidate
+            // AND it must have a missing backlink issue
+            const issues = this.getIssues(site)
+            return issues.some(issue => issue.isCleanupCandidate) && !site.backlink
+          },
+
+          // Computed property to get all sites with cleanup issues
+          get sitesForCleanup() {
+            return this.sites.filter(({site}) => this.hasCleanupIssues(site))
+          },
+
+          // Generate and open GitHub issue
+          generateIssue() {
+            if (this.sitesForCleanup.length === 0) return
+
+            // Set removal date to 30 days from now
+            const removalDate = new Date()
+            removalDate.setDate(removalDate.getDate() + 30)
+            const formattedRemovalDate = removalDate.toISOString().split('T')[0]
+
+            // Generate issue title
+            const title = `webring cleanup on ${formattedRemovalDate}`
+
+            // Generate issue body
+            let body = `Hello! 👋\n\n`
+            body += `As part of occasional housekeeping, which includes tidying up the webring, I will be removing sites from the webring that no longer has a backlink. This has been scheduled to take place on ${formattedRemovalDate}.\n\n`
+            body += `The following table lists the websites that are missing a backlink:\n\n`
+
+            // Create a table with site information
+            body += `| Site ID | Site Owner | Remark |\n`
+            body += `| --- | --- | --- |\n`
+
+            this.sitesForCleanup.forEach(({id, site}) => {
+              const issues = this.getIssues(site);
+              const remarks = issues.map(issue => issue.message).join(", ");
+              body += `| ${id} | ${site.owner ? `@${site.owner}` : ''} | ${remarks} |\n`
+            })
+
+            body += `\n- If you are on this list and would like to continue your participation on the webring, please make sure your site is accessible and has a backlink by ${new Date(removalDate.getTime() - 86400000).toISOString().split('T')[0]}. I will re-check the websites again by that time. Thank you for your continued support.\n\n`
+            body += `- Otherwise, no action is required, and thank you for your participation on this webring project.\n\n`
+            body += `Regardless of whether you choose to continue participating or not, your participation helped us grow this webring by a lot, and I appreciated it very much!\n\n`
+            body += `If you need help adding the backlink, you can use this HTML code on your website:\n`
+            body += `\`\`\`html\n<a href="https://webring.wonderful.software#YOUR.SITE.ID">วงแหวนเว็บ</a>\n\`\`\`\n`
+            body += `(Replace \`YOUR.SITE.ID\` with your site ID from the table above)\n`
+
+            // Create URL to GitHub issue creation page with prefilled values
+            const issueUrl = new URL("https://github.com/wonderfulsoftware/webring/issues/new")
+            issueUrl.searchParams.set("title", title)
+            issueUrl.searchParams.set("body", body)
+            issueUrl.searchParams.set("labels", "cleanup")
+
+            // Open in a new tab
+            window.open(issueUrl.toString(), "_blank")
+          }
         }))
       })
     </script>

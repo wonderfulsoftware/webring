@@ -1,45 +1,46 @@
 require("make-promises-safe")
 require("dotenv").config()
-const encrypted = require("@dtinth/encrypted")()
 const axios = require("axios").default
 const fs = require("fs")
 const jimp = require("jimp")
 const { getSites } = require("../common/getSites")
 
-const siteFetcherInstanceBase = encrypted(`
-  hPICn0kIZz95DnrFYyUrih8KGX560QbX.cTRujVSHIJAs7EklBTU65we8I2z46k/YV8KUvis
-  D0f9cP54jlpVYWitiX0FKXr2Z67dhFj6RqGZsmqVpC6pfKfFl0UoR2+SDlmU=
-`)
+const siteFetcherInstanceBase =
+  process.env.SITE_FETCHER_INSTANCE_BASE || "http://localhost:3000"
 
 ;(async () => {
   const db = JSON.parse(
     fs.readFileSync("tmp/webring-site-data/data.json", "utf8")
   )
   const sites = getSites()
-
-  Object.values(db).forEach((data) => {
-    delete data.number
-  })
-
   const screenshotUpdates = []
+  const sitesWithNumber = new Set()
   for (const site of sites) {
     const data = db[site.id] || {}
-    console.log(site.id)
+    console.log(`::group::${site.id}`)
+    const oldData = JSON.parse(JSON.stringify(data))
+    let updateStatus = "unknown"
     try {
       if (data.url !== site.url) {
         data.url = site.url
       }
       if (
         !data.lastUpdated ||
-        data.lastUpdated < new Date(Date.now() - 3600e3 * 20).toJSON()
+        data.lastUpdated < new Date(Date.now() - 3600e3 * 20).toJSON() ||
+        !!process.env.FORCE_UPDATE
       ) {
-        const siteFetchingResponse = await axios.get(siteFetcherInstanceBase, {
-          params: {
-            url: site.url,
-            key: process.env.SITE_FETCHER_API_KEY,
-            as: "json",
-          },
-        })
+        const start = Date.now()
+        const siteFetchingResponse = await axios
+          .get(siteFetcherInstanceBase, {
+            params: {
+              url: site.url,
+              as: "json",
+            },
+          })
+          .catch((error) => {
+            updateStatus = `${error}`
+            throw error
+          })
         const fetchResult = siteFetchingResponse.data
         const imageBasename = `${site.id}_375w@2x.png`
         const imagePath = `tmp/webring-site-screenshots/${imageBasename}`
@@ -59,7 +60,12 @@ const siteFetcherInstanceBase = encrypted(`
         data.backlink = fetchResult.backlink
         data.lastUpdated = new Date().toJSON()
         console.log(data)
+        const end = Date.now()
+        updateStatus = `took ${end - start}ms`
+      } else {
+        updateStatus = "cached"
       }
+      sitesWithNumber.add(site.id)
       if (data.number !== site.number) {
         data.number = site.number
       }
@@ -70,7 +76,32 @@ const siteFetcherInstanceBase = encrypted(`
       console.error(site.id, e)
     }
     db[site.id] = data
+    console.log(`::endgroup::`)
+    const changedKeys = Array.from(
+      new Set([...Object.keys(oldData), ...Object.keys(data)])
+    )
+      .sort()
+      .filter((key) => {
+        return JSON.stringify(oldData[key]) !== JSON.stringify(data[key])
+      })
+    if (changedKeys.length) {
+      console.log(` ↳ Updated: ${changedKeys.join(", ")} (${updateStatus})`)
+    } else {
+      console.log(` ↳ No changes (${updateStatus})`)
+    }
   }
+
+  // Remove numbers from sites that are not in the list
+  for (const siteId in db) {
+    if (!sitesWithNumber.has(siteId)) {
+      const data = db[siteId]
+      if (data.number) {
+        console.log(`Removing number from ${siteId}`)
+        delete data.number
+      }
+    }
+  }
+
   fs.writeFileSync(
     "tmp/webring-site-screenshots-commit-message",
     "Update screenshots of " + screenshotUpdates.join(", ")

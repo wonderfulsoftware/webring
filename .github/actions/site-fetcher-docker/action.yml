@@ -1,0 +1,32 @@
+name: 'Run site-fetcher Docker container'
+description: 'Builds and runs the site-fetcher Docker container locally with layer caching'
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      
+    - name: Build and cache site-fetcher Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./automation/site-fetcher
+        push: false
+        load: true
+        tags: site-fetcher:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: Start site-fetcher container
+      shell: bash
+      run: docker run -d -p 3000:3000 --name site-fetcher site-fetcher:latest
+        
+    - name: Install wait-on
+      shell: bash
+      run: npm install -g wait-on
+      
+    - name: Wait for service to be ready
+      shell: bash
+      run: |
+        echo "Waiting for site-fetcher service to be ready at http://localhost:3000..."
+        npx wait-on http://localhost:3000 -t 30000
+        echo "Site-fetcher service is now available at http://localhost:3000"
