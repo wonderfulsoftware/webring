@@ -1,30 +1,34 @@
+// @ts-check
+
 require("make-promises-safe")
 require("dotenv").config()
 
-const encrypted = require("@dtinth/encrypted")()
 const { Octokit } = require("@octokit/rest")
 const { default: axios } = require("axios")
 const { escape } = require("lodash")
+const Minio = require("minio")
+const crypto = require("crypto")
 
 // Use environment variable with default to localhost
-const siteFetcherInstanceBase = process.env.SITE_FETCHER_INSTANCE_BASE || 'http://localhost:3000'
-
-// This is a private endpoint for me to upload images to Azure Blob.
-const captureEndpointUrl = encrypted(`
-  /rM4qtw8Fn5fTL2EUD2YPuslgLPpoPp4.U+Nf++VIhFJJVPy5+IrTSXHI4hhQ+n1d43rhazp
-  LLfkdI2Xxvl7XiYBKo+raSf2pYKPHMoODGwdFa8RqjP/2x1dZvGKBM6LaPaEu7luEf4eDReD
-  YLa6T76eO5/tdjHS9v7EcmeOpmOvyFYebsIELbg/tVDMErsJIqKL+i/lz
-`)
+const siteFetcherInstanceBase =
+  process.env.SITE_FETCHER_INSTANCE_BASE || "http://localhost:3000"
 
 ;(async () => {
   const url = process.argv[2]
   console.log("Loading site info...")
   const fetchResult = await fetchSiteInfo(url)
-  const ephemeralScreenshotUrl = generateEphemeralUrl(url)
   console.log("Persisting screenshot...")
-  const persistentScreenshotUrl = await persistScreenshot(
-    ephemeralScreenshotUrl
-  )
+  
+  // Convert base64 content to buffer
+  if (!fetchResult.content) {
+    throw new Error('Screenshot content not found in fetch result')
+  }
+  
+  // Remove potential data URL prefix and decode base64
+  const base64Data = fetchResult.content.replace(/^data:image\/png;base64,/, '')
+  const imageBuffer = Buffer.from(base64Data, 'base64')
+  
+  const persistentScreenshotUrl = await persistScreenshot(imageBuffer)
   const text = generateCommentText(fetchResult, persistentScreenshotUrl)
   console.log("Posting comment...")
   const commentResult = await createOrUpdateGitHubComment(text)
@@ -47,40 +51,35 @@ async function fetchSiteInfo(url) {
 }
 
 /**
- * @param {string} url
+ * @param {Buffer} imageBuffer
  */
-function generateEphemeralUrl(url) {
-  return (
-    siteFetcherInstanceBase +
-    "?" +
-    new URLSearchParams({
-      url: url,
-      key: process.env.SITE_FETCHER_API_KEY,
-    })
-  )
-}
-
-/**
- * @param {string} ephemeralScreenshotUrl
- */
-async function persistScreenshot(ephemeralScreenshotUrl) {
-  const destKey = [
-    "wonderfulsoftware/webring/pr-validator",
-    ...new Date().toJSON().split("T")[0].split("-"),
-    require("crypto")
-      .createHash("md5")
-      .update(ephemeralScreenshotUrl)
-      .digest("hex") + ".png",
-  ].join("/")
-
-  // Make screenshot persistent
-  await axios.post(captureEndpointUrl, {
-    src: ephemeralScreenshotUrl,
-    dest: destKey,
+async function persistScreenshot(imageBuffer) {
+  // Create an MD5 hash of the buffer content for the file name
+  const md5Hash = crypto
+    .createHash("md5")
+    .update(imageBuffer)
+    .digest("hex")
+    
+  const objectKey = `pr-reviews/${md5Hash}.png`
+  
+  // Initialize Minio client
+  const minioClient = new Minio.Client({
+    endPoint: 's3.inspace.cloud',
+    port: 443,
+    useSSL: true,
+    accessKey: 'PGR3DU5RPHDF8L8GGIH6',
+    secretKey: process.env.SK_PGR3DU5RPHDF8L8GGIH6
   })
-
-  const persistentScreenshotUrl =
-    "https://webshots.blob.core.windows.net/webshots/" + destKey
+  
+  // Upload to S3 with public-read permission
+  const metaData = {
+    'Content-Type': 'image/png',
+    'x-amz-acl': 'public-read'
+  }
+  
+  await minioClient.putObject('webring', objectKey, imageBuffer, metaData)
+  
+  const persistentScreenshotUrl = `https://s3.inspace.cloud/webring/${objectKey}`
   return persistentScreenshotUrl
 }
 
@@ -99,11 +98,11 @@ function generateCommentText(fetchResult, persistentScreenshotUrl) {
     const before = `#${domain}`
     const after = `#${domain.slice(1)}`
     lines.push(
-      `- ⚠ Found backlink, however, please change \`${before}\` to just \`#${after}\` for correct linking.`
+      `- ⚠ Found backlink, however, please change \`${before}\` to just \`#${after}\` for correct linking.`,
     )
   } else if (fetchResult.backlink.href.match(/YOUR\.DOMAIN/i)) {
     lines.push(
-      `- ⚠ Found backlink, however, please change \`YOUR.DOMAIN\` to your actual domain for correct linking.`
+      `- ⚠ Found backlink, however, please change \`YOUR.DOMAIN\` to your actual domain for correct linking.`,
     )
   } else {
     lines.push(`- ✅ Found backlink to ${fetchResult.backlink.href}.`)
@@ -111,7 +110,7 @@ function generateCommentText(fetchResult, persistentScreenshotUrl) {
   lines.push("", "**Site description:**")
   if (!fetchResult.description) {
     lines.push(
-      '- ℹ No site description found. Consider adding `<meta property="og:description">` or `<meta name="description">` to your website to site description show up on the webring page.'
+      '- ℹ No site description found. Consider adding `<meta property="og:description">` or `<meta name="description">` to your website to site description show up on the webring page.',
     )
   } else {
     lines.push(`- ✅ ${escape(fetchResult.description)}`)

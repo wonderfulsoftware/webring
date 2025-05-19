@@ -20,9 +20,9 @@ on:
         type: string
         required: true
     secrets:
-      ENCRYPTION_SECRET:
-        required: true
       SITE_FETCHER_API_KEY:
+        required: true
+      SK_PGR3DU5RPHDF8L8GGIH6:
         required: true
 permissions:
   contents: read
@@ -44,8 +44,8 @@ jobs:
       - run: yarn
       - run: node automation/pr-validator ${{ inputs.url }} ${{ inputs.pr }}
         env:
-          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
           BOT_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SK_PGR3DU5RPHDF8L8GGIH6: ${{ secrets.SK_PGR3DU5RPHDF8L8GGIH6 }}
 
       - name: Display site-fetcher logs
         if: always()
