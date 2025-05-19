@@ -166,5 +166,56 @@ EOF
   - Modular organization in automation directories
   - Clear separation of concerns
 
+## Webring Cleanup Process
+
+### Overview
+Periodically (typically every few months), we maintain the webring by identifying sites that no longer have a backlink or have other maintenance issues. This process involves:
+
+1. **Creating an Issue**: Document sites that need maintenance
+2. **Notify Site Owners**: Give them time to address issues (usually 1-2 weeks)
+3. **Create a Cleanup PR**: Remove entries for sites that remain unresolved
+4. **Merge the PR**: Complete the maintenance cycle
+
+### Cleanup Steps
+
+1. **Check the issue** (typically named "webring cleanup on YYYY-MM-DD") to identify sites scheduled for removal.
+
+2. **Create a cleanup branch** with standardized naming convention:
+   ```bash
+   git checkout -b cleanup-YYYYMMDD
+   ```
+
+3. **Remove the identified entries** from `index.html` by deleting the entire `<li>` elements for each site.
+
+4. **Commit the changes** with a clear message:
+   ```bash
+   git commit -m "webring cleanup on YYYY-MM-DD
+
+   Remove websites with missing backlinks:
+   - site1.com
+   - site2.com
+   - site3.com
+
+   Closes #ISSUE_NUMBER"
+   ```
+
+5. **Push the branch and create a PR**:
+   ```bash
+   git push -u origin cleanup-YYYYMMDD
+   gh pr create --title "webring cleanup on YYYY-MM-DD" --body "$(cat <<'EOF'
+   ## Summary
+   - Remove websites with missing backlinks as detailed in #ISSUE_NUMBER
+   - Sites removed: site1.com, site2.com, site3.com
+   - These sites were identified as having missing backlinks, expired domains, or other issues
+
+   Closes #ISSUE_NUMBER
+   EOF
+   )"
+   ```
+
+6. **Wait for review and merge** the PR.
+
+Note: The issue itself is generated using the dashboard tool available at [dashboard.html](https://webring.wonderful.software/dashboard.html).
+
 ## Project Structure
 Main project is a webring site with automation tools for validation, updating site data, and collecting usage statistics. Look at READMEs in subdirectories for specific functionality.
