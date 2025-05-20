@@ -18,7 +18,7 @@ jobs:
           path: tmp/webring-usage-stats
       - uses: actions/setup-node@v1
         with:
-          node-vrsion: 22.x
+          node-version: 22.x
       - run: yarn
       - run: node automation/usage-publisher/download-data-from-amplitude
         env:
