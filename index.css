@@ -94,6 +94,12 @@ main {
   background: #fff;
   border-radius: 3px;
   transition: 0.5s all;
+  display: inline-block;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
 }
 #ring li[data-current] a {
   box-shadow: 0 0 7px #da356777;
