@@ -95,7 +95,7 @@ main {
   border-radius: 3px;
   transition: 0.5s all;
   display: inline-block;
-  max-width: 80%;
+  max-width: calc(100% - 35px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
