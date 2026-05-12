@@ -127,7 +127,7 @@ const components = {
             (hash.match(/[a-z0-9\.-]+/i) || [])[0] || ""
           ).toLowerCase()
           location.replace("#/" + id)
-          const matchedLink = links.find((l) => l.id === id)
+          const matchedLink = links.find((l) => l.id === id || l.alias === id)
           if (matchedLink) {
             sendBeacon("inbound", matchedLink.id)
             transitionInfo.needsInboundTransition = true
@@ -138,7 +138,7 @@ const components = {
       }
       const updateCurrentLink = () => {
         const hash = location.hash
-        const found = links.find((l) => "#/" + l.id === hash)
+        const found = links.find((l) => "#/" + l.id === hash || (l.alias && "#/" + l.alias === hash))
         if (found) {
           currentLink.value = found
           hidingListOnMobile.value = false
@@ -915,6 +915,7 @@ function processLinksInDOM({ onLinkSelected }) {
   return Array.from(document.querySelectorAll("#ring > li")).map(
     (li, index) => {
       const id = li.id
+      const alias = li.dataset.alias
       const a = li.querySelector("a")
       const url = a.href
       const text = a.innerText
@@ -924,6 +925,7 @@ function processLinksInDOM({ onLinkSelected }) {
       const data = Vue.computed(() => siteData[id])
       const link = Vue.reactive({
         id,
+        alias,
         text,
         url,
         a,
