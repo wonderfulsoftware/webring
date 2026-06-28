@@ -8,6 +8,28 @@
 
 ## Pull Request Review Playbook
 
+### Mergeability Criteria (ALL three required before approve + squash-merge)
+
+A PR is only ready to merge once **all** of the following hold:
+
+1. **Automated validation comment is present** — the github-actions bot has posted its
+   "PR validation result" comment on the PR.
+   - If it is missing, add the `review` label to trigger it: `gh pr edit <PR_NUMBER> --add-label "review"`.
+   - If the validation workflow fails on a transient GitHub Actions cache error
+     (`BlobNotFound` / "failed to copy" from `productionresultssa11.blob.core.windows.net`),
+     it is a poisoned buildkit cache, not a PR problem. A plain re-run won't fix it —
+     clear the caches first (`gh cache delete --all`), then re-run the failed workflow
+     (`gh run rerun <RUN_ID> --failed`). Confirm with the operator before deleting caches.
+2. **Agent has checked and verified the site** — the agent confirms the HTML element
+   structure, the backlink, the site requirements (personal/non-profit, own domain, real
+   content, icon visible), cross-checking against the validation comment and its screenshot.
+3. **Human operator has done a manual review** — the agent gives the operator the site URL
+   and the operator checks it manually while the agent runs its own checks. Never approve
+   or merge without the operator's explicit confirmation.
+
+Once all three are satisfied and the operator confirms, approve and squash-merge
+(see "If site meets all requirements" below).
+
 ### Initial PR Review Checklist
 1. **Add review label** when starting review: `gh pr edit <PR_NUMBER> --add-label "review"`
    - IMPORTANT: After adding the label, immediately provide the website URL to the user for manual verification
