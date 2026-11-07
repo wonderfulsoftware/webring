@@ -52,6 +52,25 @@
 
 3. เปิด Pull Request มาพร้อมระบุตำแหน่งของไอคอนบน Desktop และ Mobile
 
+## ลิงค์ไปยังเว็บก่อนหน้า ถัดไป หรือสุ่ม
+
+ลิงค์ `https://webring.wonderful.software#YOUR.DOMAIN` จะพาผู้เข้าชมไปยังเว็บถัดไปในวงแหวน หากต้องการให้ไปยังที่อื่น ให้ต่อท้ายชื่อโดเมนด้วย `:` และคำสั่ง:
+
+| ลิงค์ | ผู้เข้าชมจะไป |
+| --- | --- |
+| `#YOUR.DOMAIN` หรือ `#YOUR.DOMAIN:next` | เว็บถัดไป |
+| `#YOUR.DOMAIN:prev` | เว็บก่อนหน้า |
+| `#YOUR.DOMAIN:random` | เว็บที่สุ่มมา |
+| `#YOUR.DOMAIN:list` | รายชื่อเว็บทั้งหมด |
+
+ถ้าคำสั่งไม่ถูกต้อง จะใช้ `:next` แทน ตัวอย่าง:
+
+```html
+<a href="https://webring.wonderful.software#YOUR.DOMAIN:prev">← ก่อนหน้า</a>
+<a href="https://webring.wonderful.software#YOUR.DOMAIN:list">รายชื่อ</a>
+<a href="https://webring.wonderful.software#YOUR.DOMAIN:next">ถัดไป →</a>
+```
+
 ## ข้อมูล
 
 สามารถถึงข้อมูลเว็บที่อยู่ในวงในรูปแบบ JSON โดยใช้ URL นี้:
