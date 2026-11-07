@@ -14,7 +14,12 @@ const TEST_MODE = new URLSearchParams(location.search).has("test")
 
 let inboundReferrer = ""
 
-const autoMode = Vue.ref("none") // 'none', 'random', 'next'
+/** What happens right after an inbound link is processed: `#site:prev`, etc. */
+const INBOUND_ACTIONS = ["next", "prev", "random", "list"]
+
+// 'none', 'random' (direct visit), 'inbound-random', or an inbound action ('next', 'prev', 'list')
+const autoMode = Vue.ref("none")
+const inboundAction = Vue.ref("next")
 const enteredApp = Vue.ref(false)
 const enteredAppPromise = new Promise((resolve) => {
   Vue.watch(
@@ -76,6 +81,7 @@ const components = {
               @random="random"
               @next="next"
               @list="showList"
+              :autoPrevious="autoPrevious"
               :autoNext="autoNext"
               :autoRandom="autoRandom"
             />
@@ -105,6 +111,7 @@ const components = {
     `,
     setup() {
       const currentLink = Vue.ref()
+      const autoPrevious = Vue.ref(false)
       const autoNext = Vue.ref(false)
       const autoRandom = Vue.ref(false)
       const transitionInfo = {
@@ -123,9 +130,13 @@ const components = {
       const processInboundLink = () => {
         const hash = location.hash
         if (hash.startsWith("#") && !hash.startsWith("#/")) {
-          const id = (
-            (hash.match(/[a-z0-9\.-]+/i) || [])[0] || ""
-          ).toLowerCase()
+          const [, rawId = "", rawAction = ""] =
+            hash.match(/([a-z0-9\.-]+)(?::([a-z]+))?/i) || []
+          const id = rawId.toLowerCase()
+          const action = rawAction.toLowerCase()
+          inboundAction.value = INBOUND_ACTIONS.includes(action)
+            ? action
+            : "next"
           location.replace("#/" + id)
           const matchedLink = links.find((l) => l.id === id || l.alias === id)
           if (matchedLink) {
@@ -185,12 +196,23 @@ const components = {
           random()
         }
         if (inbound) {
-          autoMode.value = "next"
+          const action = inboundAction.value
+          autoMode.value = action === "random" ? "inbound-random" : action
           setTimeout(() => {
             enteredAppPromise.then(() => {
               setTimeout(() => {
-                next()
-                autoNext.value = true
+                if (action === "prev") {
+                  previous()
+                  autoPrevious.value = true
+                } else if (action === "random") {
+                  random()
+                  autoRandom.value = true
+                } else if (action === "list") {
+                  showList()
+                } else {
+                  next()
+                  autoNext.value = true
+                }
               }, 200)
             })
           }, 300)
@@ -246,6 +268,7 @@ const components = {
         hidingListOnMobile,
         viewingLinks,
         go,
+        autoPrevious,
         autoNext,
         autoRandom,
         onboardingUx: "v2", // TEST_MODE ? 'v2' : 'v1'
@@ -617,6 +640,15 @@ const components = {
         <p v-if="autoMode === 'next'">
           เราจะนำคุณไปยังเว็บถัดไปในวงแหวนนี้
         </p>
+        <p v-if="autoMode === 'prev'">
+          เราจะนำคุณไปยังเว็บก่อนหน้าในวงแหวนนี้
+        </p>
+        <p v-if="autoMode === 'inbound-random'">
+          เราจะนำคุณไปยังเว็บแบบสุ่มในวงแหวนนี้
+        </p>
+        <p v-if="autoMode === 'list'">
+          เราจะแสดงรายชื่อเว็บทั้งหมดในวงแหวนนี้ให้คุณ
+        </p>
         <button
           @click="acknowledge"
           class="for-first-timer-v2__button"
@@ -674,6 +706,7 @@ const components = {
     `,
 
     props: {
+      autoPrevious: Boolean,
       autoNext: Boolean,
       autoRandom: Boolean,
     },
@@ -683,6 +716,7 @@ const components = {
         <webring-toolbar-button
           @click="$emit('previous')"
           icon="M12.586 27.414l-10-10c-0.781-0.781-0.781-2.047 0-2.828l10-10c0.781-0.781 2.047-0.781 2.828 0s0.781 2.047 0 2.828l-6.586 6.586h19.172c1.105 0 2 0.895 2 2s-0.895 2-2 2h-19.172l6.586 6.586c0.39 0.39 0.586 0.902 0.586 1.414s-0.195 1.024-0.586 1.414c-0.781 0.781-2.047 0.781-2.828 0z"
+          :flash="autoPrevious"
           id="previous-button"
         >
           Previous
